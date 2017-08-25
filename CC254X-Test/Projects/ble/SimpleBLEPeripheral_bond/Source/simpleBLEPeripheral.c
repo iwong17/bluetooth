@@ -546,7 +546,6 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    //判断接收到的RF值是否正确  
    nGUA_Ret = GUA_RF_Communication_Judgment(nbGUA_Char6); 
    
-  osal_start_timerEx(simpleBLEPeripheral_TaskID, SBP_GUA_RF_COMMUNICAION_COMMAND_ERR_EVT, 0);
    //数据正确，则执行对应事件  
    if(nGUA_Ret == GUA_RF_COMMUNICATION_JUDGMENT_TRUE)  
    {  
@@ -611,9 +610,9 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
      //关灯  
      case 0x00:  
      {  
-       P1_3 = 0;               //拉低P11       
-       P1SEL &= ~(1 << 1);     //设置P11为IO口      
-       P1DIR |= (1 << 3);      //设置P11为输出   
+       P1_3 = 0;               //拉低P13       
+       P1SEL &= ~(1 << 3);     //设置P13为IO口      
+       P1DIR |= (1 << 3);      //设置P13为输出   
          
        break;  
      }  
@@ -621,9 +620,9 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
      //开灯  
      case 0x01:  
      {  
-       P1_3 = 1;               //拉高P11       
-       P1SEL &= ~(1 << 1);     //设置P11为IO口      
-       P1DIR |= (1 << 3);      //设置P11为输出   
+       P1_3 = 1;               //拉高P13       
+       P1SEL &= ~(1 << 3);     //设置P13为IO口      
+       P1DIR |= (1 << 3);      //设置P13为输出   
          
        break;  
      }  
