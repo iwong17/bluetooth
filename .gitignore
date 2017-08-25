@@ -56,6 +56,12 @@ Backup of*
 *.r51
 *.pbi
 *.cout
+*.d51
+*.pbd
+*.browse
+*.dep
+*.dni
+*.wsdt
 
 #过滤压缩包
 *.rar
