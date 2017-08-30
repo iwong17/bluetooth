@@ -92,8 +92,8 @@
  * CONSTANTS
  */
 //增加通知宏开关
-#define GUA_ATTRTBL_CHAR6_VALUE_IDX             18  
-#define GUA_ATTRTBL_CHAR6_CCC_IDX               19
+#define ATTRTBL_CHAR6_VALUE_IDX             18  
+#define ATTRTBL_CHAR6_CCC_IDX               19
 
 // How often to perform periodic event
 #define SBP_PERIODIC_EVT_PERIOD                   5000
@@ -534,78 +534,78 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
 #endif // PLUS_BROADCASTER
   
   //通信处理事件  
- if(events & SBP_GUA_RF_COMMUNICAION_PROCESS_EVT)  
+ if(events & SBP_RF_COMMUNICAION_PROCESS_EVT)  
  {  
-   uint16 nGUA_Event;  
-   uint8 nGUA_Ret;      
-   uint8 nbGUA_Char6[SIMPLEPROFILE_CHAR6_LEN] = {0};     
+   uint16 nEvent;  
+   uint8 nRet;      
+   uint8 nbChar6[SIMPLEPROFILE_CHAR6_LEN] = {0};     
      
    //读取特征值6的数值  
-   SimpleProfile_GetParameter(SIMPLEPROFILE_CHAR6, nbGUA_Char6);  
+   SimpleProfile_GetParameter(SIMPLEPROFILE_CHAR6, nbChar6);  
          
    //判断接收到的RF值是否正确  
-   nGUA_Ret = GUA_RF_Communication_Judgment(nbGUA_Char6); 
+   nRet = RF_Communication_Judgment(nbChar6); 
    
    //数据正确，则执行对应事件  
-   if(nGUA_Ret == GUA_RF_COMMUNICATION_JUDGMENT_TRUE)  
+   if(nRet == RF_COMMUNICATION_JUDGMENT_TRUE)  
    {  
      //根据功能码判断该执行什么事件  
-     GUA_RF_Communication_Process(nbGUA_Char6, &nGUA_Event);                                 
+     RF_Communication_Process(nbChar6, &nEvent);                                 
       
      //定时器执行对应的功能事件  
-     osal_start_timerEx(simpleBLEPeripheral_TaskID, nGUA_Event, 0);                     
+     osal_start_timerEx(simpleBLEPeripheral_TaskID, nEvent, 0);                     
    }  
    //数据不正确，则反馈报错      
    else  
    {  
      //定时器执行RF通信数据出错事件  
-     osal_start_timerEx(simpleBLEPeripheral_TaskID, SBP_GUA_RF_COMMUNICAION_COMMAND_ERR_EVT, 0);           
+     osal_start_timerEx(simpleBLEPeripheral_TaskID, SBP_RF_COMMUNICAION_COMMAND_ERR_EVT, 0);           
    }  
   
-   return (events ^ SBP_GUA_RF_COMMUNICAION_PROCESS_EVT);  
+   return (events ^ SBP_RF_COMMUNICAION_PROCESS_EVT);  
  }  
   
  //通信数据出错事件  
- if (events & SBP_GUA_RF_COMMUNICAION_COMMAND_ERR_EVT)  
+ if (events & SBP_RF_COMMUNICAION_COMMAND_ERR_EVT)  
  {   
-   uint16 nGUA_ConnHandle;         
-   uint8 nGUA_Func;      
-   uint8 nbGUA_ValidData[16];   
-   uint8 nGUA_ValidData_Len;  
+   uint16 nConnHandle;         
+   uint8 nFunc;      
+   uint8 nbValidData[16];   
+   uint8 nValidData_Len;  
      
    //获得连接句柄  
-   GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nGUA_ConnHandle);  
+   GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);  
   
    //功能码填充    
-   nGUA_Func = 0x80;         
+   nFunc = 0x80;         
   
    //有效数据填充  
-   //nbGUA_ValidData[0] = 0;  
+   //nbValidData[0] = 0;  
      
    //有效数据的长度  
-   nGUA_ValidData_Len = 0;  
+   nValidData_Len = 0;  
   
    //发送数据     
-   GUA_RF_Communication_DataPackage_Send(nGUA_ConnHandle, nGUA_Func, nbGUA_ValidData, nGUA_ValidData_Len);      
+   RF_Communication_DataPackage_Send(nConnHandle, nFunc, nbValidData, nValidData_Len);      
      
-   return (events ^ SBP_GUA_RF_COMMUNICAION_COMMAND_ERR_EVT);  
+   return (events ^ SBP_RF_COMMUNICAION_COMMAND_ERR_EVT);  
  }   
      
  //功能码00 led开关事件  
- if ( events & SBP_GUA_LED_ON_OFF_EVT )  
+ if ( events & SBP_LED_ON_OFF_EVT )  
  {  
-   uint16 nGUA_ConnHandle;         
-   uint8 nGUA_Func;      
-   uint8 nbGUA_ValidData[16];   
-   uint8 nGUA_ValidData_Len;  
-   uint8 nbGUA_Char6[SIMPLEPROFILE_CHAR6_LEN] = {0};    
+   uint16 nConnHandle;         
+   uint8 nFunc;      
+   uint8 nbValidData[16];   
+   uint8 nValidData_Len;  
+   uint8 nbChar6[SIMPLEPROFILE_CHAR6_LEN] = {0};    
      
    /*****************处理指令************************/  
    //读出RF接收到的数据到缓冲区  
-   SimpleProfile_GetParameter(SIMPLEPROFILE_CHAR6, nbGUA_Char6);  
+   SimpleProfile_GetParameter(SIMPLEPROFILE_CHAR6, nbChar6);  
   
    //如果为0则关灯  
-   switch(nbGUA_Char6[3])  
+   switch(nbChar6[3])  
    {  
      //关灯  
      case 0x00:  
@@ -633,21 +633,21 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
      
    /*****************应答************************/  
    //获得连接句柄  
-   GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nGUA_ConnHandle);  
+   GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);  
   
    //功能码填充    
-   nGUA_Func = 0x00;         
+   nFunc = 0x00;         
   
    //有效数据填充  
-   //nbGUA_ValidData[0] = 0;  
+   //nbValidData[0] = 0;  
     
    //有效数据的长度  
-   nGUA_ValidData_Len = 0;  
+   nValidData_Len = 0;  
   
    //发送数据     
-   GUA_RF_Communication_DataPackage_Send(nGUA_ConnHandle, nGUA_Func, nbGUA_ValidData, nGUA_ValidData_Len);       
+   RF_Communication_DataPackage_Send(nConnHandle, nFunc, nbValidData, nValidData_Len);       
   
-   return (events ^ SBP_GUA_LED_ON_OFF_EVT);  
+   return (events ^ SBP_LED_ON_OFF_EVT);  
  } 
 
   // Discard unknown events
@@ -915,7 +915,7 @@ static void simpleProfileChangeCB( uint8 paramID )
     case SIMPLEPROFILE_CHAR6:    
     {   
       //启动RF通信处理事件  
-      osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_GUA_RF_COMMUNICAION_PROCESS_EVT, 0 );          
+      osal_start_timerEx( simpleBLEPeripheral_TaskID, SBP_RF_COMMUNICAION_PROCESS_EVT, 0 );          
       break;        
     }  
 

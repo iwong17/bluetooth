@@ -120,14 +120,14 @@ void buzzerStop(void)
 }  
 
 //******************************************************************************          
-//name:             GUA_Timer1_Init          
+//name:             Timer1_Init          
 //introduce:        定时器1的初始化        
 //parameter:        none         
 //return:           none
 //changetime:       2017.08.23
 //author:           
 //******************************************************************************     
-void GUA_Timer1_Init(void)      
+void Timer1_Init(void)      
 {  
   //定时器1配置  
   T1CTL = (3<<2)|(2<<0);            //0000(reserved)、11(128分频，32M/128=250K、10（Modulo）  
@@ -143,7 +143,7 @@ void GUA_Timer1_Init(void)
 }  
   
 //******************************************************************************    
-//name:             GUA_Timer1_ISR          
+//name:             Timer1_ISR          
 //introduce:        定时器1的中断服务函数        
 //parameter:        none         
 //return:           none 
@@ -151,7 +151,7 @@ void GUA_Timer1_Init(void)
 //author: 
 //******************************************************************************    
 #pragma vector = T1_VECTOR     
-__interrupt void GUA_Timer1_ISR(void)     
+__interrupt void Timer1_ISR(void)     
 {             
   unsigned char flags = T1STAT;  
     

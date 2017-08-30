@@ -58,10 +58,10 @@
 /*********************************************************************
  * CONSTANTS
  */
-#define GUA_ATTRTBL_CHAR4_VALUE_IDX             11  //WY 17.8.23修改 增加两个通知开关的宏     
-#define GUA_ATTRTBL_CHAR4_CCC_IDX               12       
-#define GUA_ATTRTBL_CHAR6_VALUE_IDX             18  
-#define GUA_ATTRTBL_CHAR6_CCC_IDX               19 
+#define ATTRTBL_CHAR4_VALUE_IDX             11  //WY 17.8.23修改 增加两个通知开关的宏     
+#define ATTRTBL_CHAR4_CCC_IDX               12       
+#define ATTRTBL_CHAR6_VALUE_IDX             18  
+#define ATTRTBL_CHAR6_CCC_IDX               19 
 
 #define SERVAPP_NUM_ATTR_SUPPORTED              21 //WY 17.8.23修改 原先为20 char6 增加config属性
 
@@ -848,33 +848,33 @@ static void simpleProfile_HandleConnStatusCB( uint16 connHandle, uint8 changeTyp
 }
 
 //******************************************************************************                  
-//name:             GUA_SimpleGATTprofile_Char6_Notify                 
+//name:             SimpleGATTprofile_Char6_Notify                 
 //introduce:        发送char6通道的数据             
-//parameter:        nGUA_ConnHandle: 连接句柄   
-//                  npGUA_Value: 要通知的数据,范围为0~SIMPLEPROFILE_CHAR6,最多20个字节   
-//                  nGUA_Len: 要通知的数据的长度    
+//parameter:        nConnHandle: 连接句柄   
+//                  npValue: 要通知的数据,范围为0~SIMPLEPROFILE_CHAR6,最多20个字节   
+//                  nLen: 要通知的数据的长度    
 //return:           none               
 //author:                                                      
 //changetime:       2017.08.23                       
 //******************************************************************************     
-void GUA_SimpleGATTprofile_Char6_Notify(uint16 nGUA_ConnHandle, uint8 *pGUA_Value, uint8 nGUA_Len)    
+void SimpleGATTprofile_Char6_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLen)    
 {    
-  attHandleValueNoti_t  stGUA_Noti;    
-  uint16 nGUA_Return;    
+  attHandleValueNoti_t  stNoti;    
+  uint16 nReturn;    
     
   //读出CCC的值   
-  nGUA_Return = GATTServApp_ReadCharCfg(nGUA_ConnHandle, simpleProfileChar6Config);   
+  nReturn = GATTServApp_ReadCharCfg(nConnHandle, simpleProfileChar6Config);   
     
   //判断是否打开通知开关，打开了则发送数据    
-  if (nGUA_Return & GATT_CLIENT_CFG_NOTIFY)   
+  if (nReturn & GATT_CLIENT_CFG_NOTIFY)   
   {    
     //填充数据  
-    stGUA_Noti.handle = simpleProfileAttrTbl[GUA_ATTRTBL_CHAR6_VALUE_IDX].handle;    
-    stGUA_Noti.len = nGUA_Len;    
-    osal_memcpy(stGUA_Noti.value, pGUA_Value, nGUA_Len);  
+    stNoti.handle = simpleProfileAttrTbl[ATTRTBL_CHAR6_VALUE_IDX].handle;    
+    stNoti.len = nLen;    
+    osal_memcpy(stNoti.value, pValue, nLen);  
       
     //发送数据  
-    GATT_Notification(nGUA_ConnHandle, &stGUA_Noti, FALSE);    
+    GATT_Notification(nConnHandle, &stNoti, FALSE);    
   }    
 }
 

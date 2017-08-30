@@ -59,9 +59,9 @@ extern "C"
 #define SBP_PERIODIC_EVT                                  0x0002
 #define SBP_ADV_IN_CONNECTION_EVT                         0x0004
   
-#define SBP_GUA_RF_COMMUNICAION_PROCESS_EVT               0x0008  //通信处理事件  
-#define SBP_GUA_RF_COMMUNICAION_COMMAND_ERR_EVT           0x0010  //通信数据出错事件  
-#define SBP_GUA_LED_ON_OFF_EVT                            0x0020  //led开关事件
+#define SBP_RF_COMMUNICAION_PROCESS_EVT               0x0008  //通信处理事件  
+#define SBP_RF_COMMUNICAION_COMMAND_ERR_EVT           0x0010  //通信数据出错事件  
+#define SBP_LED_ON_OFF_EVT                            0x0020  //led开关事件
 
 /*********************************************************************
  * MACROS

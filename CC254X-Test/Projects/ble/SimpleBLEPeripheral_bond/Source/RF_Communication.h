@@ -8,26 +8,26 @@
 #define _RF_COMMUNICATION_H_  
   
 /*********************宏定义************************/   
-#ifndef GUA_U8      
-typedef unsigned char GUA_U8;      
+#ifndef U8      
+typedef unsigned char U8;      
 #endif      
     
-#ifndef GUA_U16      
-typedef unsigned short GUA_U16;      
+#ifndef U16      
+typedef unsigned short U16;      
 #endif      
     
-#ifndef GUA_U32      
-typedef unsigned long GUA_U32;      
+#ifndef U32      
+typedef unsigned long U32;      
 #endif      
   
-#define GUA_RF_COMMUNICATION_JUDGMENT_FALSE     0  
-#define GUA_RF_COMMUNICATION_JUDGMENT_TRUE      1  
+#define RF_COMMUNICATION_JUDGMENT_FALSE     0  
+#define RF_COMMUNICATION_JUDGMENT_TRUE      1  
   
   
 /*********************外部函数声明************************/    
-extern GUA_U8 GUA_RF_Communication_Judgment(GUA_U8 *npGUA_Receive);  
-extern void GUA_RF_Communication_DataPackage_Send(GUA_U16 nGUA_ConnHandle,   
-                                                  GUA_U8 nGUA_Func, GUA_U8 *npGUA_ValidData, GUA_U8 nGUA_ValidData_Len);  
-extern void GUA_RF_Communication_Process(GUA_U8 *npGUA_Receive, unsigned short *npGUA_Event);
+extern U8 RF_Communication_Judgment(U8 *npReceive);  
+extern void RF_Communication_DataPackage_Send(U16 nConnHandle,   
+                                                  U8 nFunc, U8 *npValidData, U8 nValidData_Len);  
+extern void RF_Communication_Process(U8 *npReceive, unsigned short *npEvent);
   
 #endif  
