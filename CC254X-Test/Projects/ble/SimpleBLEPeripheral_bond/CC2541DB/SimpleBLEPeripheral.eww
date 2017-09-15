@@ -2,6 +2,9 @@
 
 <workspace>
   <project>
+    <path>E:\PSoftWare\TI\BLE-CC254x-1.3.2\Projects\ble\SimpleBLECentral\CC2541\SimpleBLECentral.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\SimpleBLEPeripheral.ewp</path>
   </project>
   <batchBuild/>

@@ -18,16 +18,16 @@
 //******************************************************************************     
 void GPIOInit(void)
 {
-    //P0SEL = 0; // Configure Port 0 as GPIO
+    P0SEL = 0; // Configure Port 0 as GPIO
     P1SEL = 0; // Configure Port 1 as GPIO
     //P2SEL = 0; // Configure Port 2 as GPIO
 
-    //P0DIR = 0xFC; // Port 0 pins P0.0 and P0.1 as input (buttons),
+    P0DIR = 0xFF; // Port 0 pins P0.0 and P0.1 as input (buttons),
                 // all others (P0.2-P0.7) as output
     P1DIR = 0xFF; // All port 1 pins (P1.0-P1.7) as output
     //P2DIR = 0x1F; // All port 1 pins (P2.0-P2.4) as output
 
-    //P0 = 0x03; // All pins on port 0 to low except for P0.0 and P0.1 (buttons)
+    P0 = 0x00; // All pins on port 0 to low except for P0.0 and P0.1 (buttons)
     P1 = 0x00;   // All pins on port 1 to low
     //P2 = 0;   // All pins on port 2 to low
 }
@@ -164,4 +164,20 @@ __interrupt void Timer1_ISR(void)
     P1DIR |= (1 << 1);    //设置为输出  
     //test     
   }  
+}
+
+//**************************************************  
+//name:         Read_Mac  
+//input:        mac需要保存到的位置，需要6个字节大小  
+//return:       none  
+//**************************************************  
+void Read_Mac(uint8 *ownAddress)     //读本机MAC 在初始化时不能通过
+                                     //GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddress);去读取MAC，因为此时MAC还没有写入到该变量中 
+{  
+  ownAddress[5] = *(unsigned char *)(0x780E); // 直接指向指针内容     
+  ownAddress[4] = *(unsigned char *)(0x780F);    
+  ownAddress[3] = *(unsigned char *)(0x7810);    
+  ownAddress[2] = XREG(0x7811);                // define 函数直接读出数据     
+  ownAddress[1] = XREG(0x7812);    
+  ownAddress[0] = XREG(0x7813);   
 } 
