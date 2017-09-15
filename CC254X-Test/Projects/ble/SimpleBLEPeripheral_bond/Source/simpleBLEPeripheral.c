@@ -894,6 +894,8 @@ static void performPeriodicTask( void )
 static void simpleProfileChangeCB( uint8 paramID )
 {
   uint8 newValue;
+  
+  uint8 str[20];
 
   switch( paramID )
   {
@@ -908,6 +910,10 @@ static void simpleProfileChangeCB( uint8 paramID )
 
     case SIMPLEPROFILE_CHAR3:
       SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &newValue );
+      
+      str[0]=newValue;
+      str[1]='\0';
+      NPI_WriteTransport(str, osal_strlen((char*)str));//将CHAR3接收到的字符通过串口发送出去
 
       #if (defined HAL_LCD) && (HAL_LCD == TRUE)
         HalLcdWriteStringValue( "Char 3:", (uint16)(newValue), 10,  HAL_LCD_LINE_3 );
@@ -1058,7 +1064,10 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                 NPI_ReadTransport(buffer,numBytes);     
   
                 //把收到的数据发送到串口-实现回环   
-                NPI_WriteTransport(buffer, numBytes);    
+                NPI_WriteTransport(buffer, numBytes);
+                
+                //将串口接收到数据通过CHAR4蓝牙发送出去
+                SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), buffer);    
   
                 //释放申请的缓冲区  
                 osal_mem_free(buffer);  
