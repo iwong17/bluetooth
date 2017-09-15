@@ -18,16 +18,16 @@
 //******************************************************************************     
 void GPIOInit(void)
 {
-    P0SEL = 0; // Configure Port 0 as GPIO
+    //P0SEL = 0xc0; // Configure Port 0 as GPIO
     P1SEL = 0; // Configure Port 1 as GPIO
     //P2SEL = 0; // Configure Port 2 as GPIO
 
-    P0DIR = 0xFF; // Port 0 pins P0.0 and P0.1 as input (buttons),
+    //P0DIR = 0xFF; // Port 0 pins P0.0 and P0.1 as input (buttons),
                 // all others (P0.2-P0.7) as output
     P1DIR = 0xFF; // All port 1 pins (P1.0-P1.7) as output
     //P2DIR = 0x1F; // All port 1 pins (P2.0-P2.4) as output
 
-    P0 = 0x00; // All pins on port 0 to low except for P0.0 and P0.1 (buttons)
+    //P0 = 0x0c; // All pins on port 0 to low except for P0.0 and P0.1 (buttons)
     P1 = 0x00;   // All pins on port 1 to low
     //P2 = 0;   // All pins on port 2 to low
 }

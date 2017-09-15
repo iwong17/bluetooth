@@ -74,7 +74,7 @@ extern "C"
 #endif
 
 #if !defined( NPI_UART_FC )
-#define NPI_UART_FC                    TRUE
+#define NPI_UART_FC                    FALSE//TRUE 关闭流控（需要多两根线）
 #endif // !NPI_UART_FC
 
 #define NPI_UART_FC_THRESHOLD          48

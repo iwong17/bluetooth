@@ -233,6 +233,7 @@ static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg );
 static void peripheralStateNotificationCB( gaprole_States_t newState );
 static void performPeriodicTask( void );
 static void simpleProfileChangeCB( uint8 paramID );
+static void NpiSerialCallback( uint8 port, uint8 events );//声明串口回调函数
 
 // Application states
 enum
@@ -304,6 +305,9 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   simpleBLEPeripheral_TaskID = task_id;
   
   GPIOInit(); //关闭P1_3 LED灯
+  
+  NPI_InitTransport( NpiSerialCallback );//初始化串口
+   
   // Setup the GAP
 //  VOID GAP_SetParamValue( TGAP_CONN_PAUSE_PERIPHERAL, DEFAULT_CONN_PAUSE_PERIPHERAL );
   
@@ -454,7 +458,7 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   HCI_EXT_MapPmIoPortCmd( HCI_EXT_PM_IO_PORT_P0, HCI_EXT_PM_IO_PORT_PIN7 );
 
 #endif // defined ( DC_DC_P0_7 )
-
+  
   // Setup a delayed profile startup
   osal_set_event( simpleBLEPeripheral_TaskID, SBP_START_DEVICE_EVT );
 
@@ -1020,6 +1024,48 @@ static void ProcessPairStateCB( uint16 connHandle, uint8 state, uint8 status )
     }
   }
 
-} 
+}
+
+//******************************************************************************          
+//name:             NpiSerialCallback          
+//introduce:        串口回调函数        
+//parameter:        port event         
+//return:           none
+//changetime:       2017.09.15
+//author:           wy
+//****************************************************************************** 
+static void NpiSerialCallback( uint8 port, uint8 events )  
+{  
+    (void)port;//加个 (void)，是未了避免编译告警，明确告诉缓冲区不用理会这个变量  
+  
+    if (events & (HAL_UART_RX_TIMEOUT | HAL_UART_RX_FULL))   //串口有数据  
+    {  
+        uint8 numBytes = 0;  
+  
+        numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节  
+          
+        if(numBytes == 0)  
+        {  
+            return;  
+        }  
+        else  
+        {  
+            //申请缓冲区buffer  
+            uint8 *buffer = osal_mem_alloc(numBytes);  
+            if(buffer)  
+            {  
+                //读取读取串口缓冲区数据，释放串口数据     
+                NPI_ReadTransport(buffer,numBytes);     
+  
+                //把收到的数据发送到串口-实现回环   
+                NPI_WriteTransport(buffer, numBytes);    
+  
+                //释放申请的缓冲区  
+                osal_mem_free(buffer);  
+            }  
+        }  
+    }  
+}
+
 /*********************************************************************
 *********************************************************************/
