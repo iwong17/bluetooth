@@ -149,7 +149,7 @@ extern bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value
  */
 extern bStatus_t SimpleProfile_GetParameter( uint8 param, void *value );
 
-extern void SimpleGATTprofile_Char6_Notify(uint16 nGUA_ConnHandle, uint8 *pGUA_Value, uint8 nGUA_Len);
+extern void SimpleGATTprofile_Char6_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLen);
 
 extern void SimpleGATTprofile_Char4_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLen); 
 

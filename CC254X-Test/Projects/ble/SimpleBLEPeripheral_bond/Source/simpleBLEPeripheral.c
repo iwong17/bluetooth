@@ -677,25 +677,30 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    if(buffer)  
    {  
      //读取读取串口缓冲区数据，释放串口数据     
-     NPI_ReadTransport(buffer,numBytes);     
-  
-     //把收到的数据发送到串口-实现回环   
-     NPI_WriteTransport(buffer, numBytes);
-     
-     uint8 nbDataPackage_Data[20];
-     //初始化发送缓冲区  
-     osal_memset(nbDataPackage_Data, 0xFF, 20); 
-     
-     osal_memcpy(nbDataPackage_Data,buffer,numBytes);
-     
-     //获得连接句柄  
-     GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);
-     
-     SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
+     NPI_ReadTransport(buffer,numBytes);
 
-     //释放申请的缓冲区  
-     osal_mem_free(buffer);  
-    }
+     if(buffer[0] == 0x02 && buffer[numBytes-1] == 0x03)//判断帧头帧尾
+     {  
+       //把收到的数据发送到串口-实现回环   
+      NPI_WriteTransport(buffer, numBytes);
+     
+      uint8 nbDataPackage_Data[20];
+      //初始化发送缓冲区  
+      osal_memset(nbDataPackage_Data, 0xFF, 20); 
+     
+      osal_memcpy(nbDataPackage_Data,buffer,numBytes);
+     
+      if(nbDataPackage_Data[0] != 0xFF)
+      {
+        //获得连接句柄  
+        GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);
+     
+        SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
+      }
+     }
+        //释放申请的缓冲区  
+        osal_mem_free(buffer);  
+   }
    return (events ^ TEST_EVT);
  }
 
@@ -1110,6 +1115,23 @@ static void NpiSerialCallback( uint8 port, uint8 events )
   
                 //把收到的数据发送到串口-实现回环   
                 //NPI_WriteTransport(buffer, numBytes);
+     
+                //uint8 nbDataPackage_Data[20];
+                //初始化发送缓冲区  
+                //osal_memset(nbDataPackage_Data, 0xFF, 20); 
+     
+                //osal_memcpy(nbDataPackage_Data,buffer,numBytes);
+     
+                //if(nbDataPackage_Data[0] != 0xFF)
+                //{
+                  //获得连接句柄  
+                  //GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);
+     
+                  //SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
+                //}
+
+                //释放申请的缓冲区  
+                //osal_mem_free(buffer);
                 
                 osal_start_timerEx( simpleBLEPeripheral_TaskID, TEST_EVT, 0 );
                 

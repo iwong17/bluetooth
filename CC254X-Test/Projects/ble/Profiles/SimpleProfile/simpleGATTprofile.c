@@ -886,7 +886,7 @@ void SimpleGATTprofile_Char6_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLe
 //                  nLen: 要通知的数据的长度    
 //return:           none               
 //author:                                                      
-//changetime:       2017.08.23                       
+//changetime:       2017.09.18                       
 //******************************************************************************     
 void SimpleGATTprofile_Char4_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLen)    
 {    
