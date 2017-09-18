@@ -167,27 +167,40 @@ static gaprole_States_t gapProfileState = GAPROLE_INIT;
 static uint8 scanRspData[] =
 {
   // complete name
-  0x14,   // length of this data
+  0x0d,//0x14,   // length of this data
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,
-  0x53,   // 'S'
-  0x69,   // 'i'
-  0x6d,   // 'm'
-  0x70,   // 'p'
-  0x6c,   // 'l'
-  0x65,   // 'e'
+  //0x53,   // 'S'
+  //0x69,   // 'i'
+  //0x6d,   // 'm'
+  //0x70,   // 'p'
+  //0x6c,   // 'l'
+  //0x65,   // 'e'
+  //0x42,   // 'B'
+  //0x4c,   // 'L'
+  //0x45,   // 'E'
+  //0x50,   // 'P'
+  //0x65,   // 'e'
+  //0x72,   // 'r'
+  //0x69,   // 'i'
+  //0x70,   // 'p'
+  //0x68,   // 'h'
+  //0x65,   // 'e'
+  //0x72,   // 'r'
+  //0x61,   // 'a'
+  //0x6c,   // 'l'
+  
   0x42,   // 'B'
   0x4c,   // 'L'
   0x45,   // 'E'
-  0x50,   // 'P'
-  0x65,   // 'e'
-  0x72,   // 'r'
-  0x69,   // 'i'
-  0x70,   // 'p'
-  0x68,   // 'h'
-  0x65,   // 'e'
-  0x72,   // 'r'
-  0x61,   // 'a'
-  0x6c,   // 'l'
+  0x2d,   // '-'
+  0x42,   // 'B'
+  0x4F,   // 'O'
+  0x4C,   // 'L'
+  0x55,   // 'U'
+  0x54,   // 'T'
+  0x45,   // 'E'
+  0x47,   // 'K'
+  0x31,   // '1'
 
   // connection interval range
   0x05,   // length of this data
@@ -652,7 +665,39 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    RF_Communication_DataPackage_Send(nConnHandle, nFunc, nbValidData, nValidData_Len);       
   
    return (events ^ SBP_LED_ON_OFF_EVT);  
- } 
+ }
+
+ if ( events & TEST_EVT )  
+ {
+   uint8 numBytes = 0;
+   uint16 nConnHandle; 
+   numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节  
+   //申请缓冲区buffer  
+   uint8 *buffer = osal_mem_alloc(numBytes);  
+   if(buffer)  
+   {  
+     //读取读取串口缓冲区数据，释放串口数据     
+     NPI_ReadTransport(buffer,numBytes);     
+  
+     //把收到的数据发送到串口-实现回环   
+     NPI_WriteTransport(buffer, numBytes);
+     
+     uint8 nbDataPackage_Data[20];
+     //初始化发送缓冲区  
+     osal_memset(nbDataPackage_Data, 0xFF, 20); 
+     
+     osal_memcpy(nbDataPackage_Data,buffer,numBytes);
+     
+     //获得连接句柄  
+     GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);
+     
+     SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
+
+     //释放申请的缓冲区  
+     osal_mem_free(buffer);  
+    }
+   return (events ^ TEST_EVT);
+ }
 
   // Discard unknown events
   return 0;
@@ -878,7 +923,7 @@ static void performPeriodicTask( void )
      * a GATT client device, then a notification will be sent every time this
      * function is called.
      */
-    SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
+    //SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
   }
 }
 
@@ -1057,21 +1102,20 @@ static void NpiSerialCallback( uint8 port, uint8 events )
         else  
         {  
             //申请缓冲区buffer  
-            uint8 *buffer = osal_mem_alloc(numBytes);  
-            if(buffer)  
-            {  
+            //uint8 *buffer = osal_mem_alloc(numBytes);  
+            //if(buffer)  
+            //{  
                 //读取读取串口缓冲区数据，释放串口数据     
-                NPI_ReadTransport(buffer,numBytes);     
+                //NPI_ReadTransport(buffer,numBytes);     
   
                 //把收到的数据发送到串口-实现回环   
-                NPI_WriteTransport(buffer, numBytes);
+                //NPI_WriteTransport(buffer, numBytes);
                 
-                //将串口接收到数据通过CHAR4蓝牙发送出去
-                SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), buffer);    
-  
+                osal_start_timerEx( simpleBLEPeripheral_TaskID, TEST_EVT, 0 );
+                
                 //释放申请的缓冲区  
-                osal_mem_free(buffer);  
-            }  
+                //osal_mem_free(buffer);  
+            //}  
         }  
     }  
 }

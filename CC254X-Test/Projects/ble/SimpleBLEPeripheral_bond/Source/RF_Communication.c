@@ -96,9 +96,9 @@ void RF_Communication_DataPackage_Send(uint16 nConnHandle, uint8 nFunc, uint8 *n
   memset(nbDataPackage_Data, 0xFF, 20);    
     
   //填充数据  
-  nbDataPackage_Data[0] = 0xFE;                                                     //包头  
-  nbDataPackage_Data[1] = nValidData_Len;                                       //有效数据长度    
-  nbDataPackage_Data[2] = nFunc;                                                //功能码  
+  nbDataPackage_Data[0] = 0xFE;                                             //包头  
+  nbDataPackage_Data[1] = nValidData_Len;                                   //有效数据长度    
+  nbDataPackage_Data[2] = nFunc;                                            //功能码  
   memcpy(nbDataPackage_Data + 3, npValidData, nValidData_Len);              //有效数据  
   
     

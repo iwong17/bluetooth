@@ -878,5 +878,36 @@ void SimpleGATTprofile_Char6_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLe
   }    
 }
 
+//******************************************************************************                  
+//name:             SimpleGATTprofile_Char4_Notify                 
+//introduce:        发送char4通道的数据             
+//parameter:        nConnHandle: 连接句柄   
+//                  npValue: 要通知的数据,范围为0~SIMPLEPROFILE_CHAR4,最多20个字节   
+//                  nLen: 要通知的数据的长度    
+//return:           none               
+//author:                                                      
+//changetime:       2017.08.23                       
+//******************************************************************************     
+void SimpleGATTprofile_Char4_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLen)    
+{    
+  attHandleValueNoti_t  stNoti;    
+  uint16 nReturn;    
+    
+  //读出CCC的值   
+  nReturn = GATTServApp_ReadCharCfg(nConnHandle, simpleProfileChar4Config);   
+    
+  //判断是否打开通知开关，打开了则发送数据    
+  if (nReturn & GATT_CLIENT_CFG_NOTIFY)   
+  {    
+    //填充数据  
+    stNoti.handle = simpleProfileAttrTbl[ATTRTBL_CHAR4_VALUE_IDX].handle;    
+    stNoti.len = nLen;    
+    osal_memcpy(stNoti.value, pValue, nLen);  
+      
+    //发送数据  
+    GATT_Notification(nConnHandle, &stNoti, FALSE);    
+  }    
+}
+
 /*********************************************************************
 *********************************************************************/

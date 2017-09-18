@@ -62,13 +62,13 @@ extern "C"
 #define SIMPLEPROFILE_CHAR6                   5  // RW uint8 - Profile Characteristic 6 value 
   
 // Simple Profile Service UUID
-#define SIMPLEPROFILE_SERV_UUID               0xFFF0
+#define SIMPLEPROFILE_SERV_UUID               0xFEE0//0xFFF0
     
 // Key Pressed UUID
 #define SIMPLEPROFILE_CHAR1_UUID            0xFFF1
 #define SIMPLEPROFILE_CHAR2_UUID            0xFFF2
-#define SIMPLEPROFILE_CHAR3_UUID            0xFFF3
-#define SIMPLEPROFILE_CHAR4_UUID            0xFFF4
+#define SIMPLEPROFILE_CHAR3_UUID            0xFEE2//0xFFF3
+#define SIMPLEPROFILE_CHAR4_UUID            0xFEE1//0xFFF4
 #define SIMPLEPROFILE_CHAR5_UUID            0xFFF5
 #define SIMPLEPROFILE_CHAR6_UUID            0xFFF6
   
@@ -76,6 +76,7 @@ extern "C"
 #define SIMPLEPROFILE_SERVICE               0x00000001
 
 // Length of Characteristic 5 in bytes
+#define SIMPLEPROFILE_CHAR4_LEN           20 //增加CHAR4为20字节一包
 #define SIMPLEPROFILE_CHAR5_LEN           5 
 #define SIMPLEPROFILE_CHAR6_LEN           20  //20字节一包 wy 17.8.23修改 原先为6 
 
@@ -148,7 +149,9 @@ extern bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value
  */
 extern bStatus_t SimpleProfile_GetParameter( uint8 param, void *value );
 
-extern void GUA_SimpleGATTprofile_Char6_Notify(uint16 nGUA_ConnHandle, uint8 *pGUA_Value, uint8 nGUA_Len);
+extern void SimpleGATTprofile_Char6_Notify(uint16 nGUA_ConnHandle, uint8 *pGUA_Value, uint8 nGUA_Len);
+
+extern void SimpleGATTprofile_Char4_Notify(uint16 nConnHandle, uint8 *pValue, uint8 nLen); 
 
 /*********************************************************************
 *********************************************************************/
