@@ -14,5 +14,6 @@ extern void Timer1_Init(void);
 
 extern void Read_Mac(uint8 *ownAddress);
 
-void Delay_ms(unsigned short time);
+extern void Delay_ms(unsigned int time);
+extern void Delay_us(unsigned int time);
 #endif

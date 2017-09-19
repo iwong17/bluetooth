@@ -153,7 +153,7 @@ void Timer1_Init(void)
 //changetime:       2017.09.18
 //author:           
 //****************************************************************************** 
-void Delay_ms(unsigned short time)
+void Delay_ms(unsigned int time)
 {
   //定时器1配置  
   T1CTL = (3<<2)|(2<<0);            //0000(reserved)、11(128分频，32M/128=250K、10（Modulo）  
@@ -171,7 +171,29 @@ void Delay_ms(unsigned short time)
   T1CTL &= ~0x03; //关闭定时器
 }
 
-  
+//******************************************************************************          
+//name:             Delay_us          
+//introduce:        延时函数        
+//parameter:        time         
+//return:           none
+//changetime:       2017.09.18
+//author:           
+//******************************************************************************
+void Delay_us(unsigned int time)  
+{  
+  while(time--)  
+  {  
+    /* 32 NOPs == 1 usecs */  
+    asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");  
+    asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");  
+    asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");  
+    asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");  
+    asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");  
+    asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");  
+    asm("nop"); asm("nop");  
+  }  
+} 
+ 
 //******************************************************************************    
 //name:             Timer1_ISR          
 //introduce:        定时器1的中断服务函数        
@@ -188,13 +210,11 @@ __interrupt void Timer1_ISR(void)
   //通道0  
   if(flags & T1STAT_CHOIF)  
   {  
-    //test
     if(timeflag) timeflag--;  
     P1_1 = ~P1_1;         //这里测试定时一次，就取反一次P1_1，方便观察 P1_1对应的led  
     P1SEL &= ~(1 << 1);   //设置为 IO 口  
     P1DIR |= (1 << 1);    //设置为输出
-    //IEN1 |= (1<<0);       //关闭定时器1中断使能  
-    //test     
+    //IEN1 |= (1<<0);       //关闭定时器1中断使能       
   }  
 }
 

@@ -463,7 +463,8 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   // Enable clock divide on halt
   // This reduces active current while radio is active and CC254x MCU
   // is halted
-  HCI_EXT_ClkDivOnHaltCmd( HCI_EXT_ENABLE_CLK_DIVIDE_ON_HALT );
+  //HCI_EXT_ClkDivOnHaltCmd( HCI_EXT_ENABLE_CLK_DIVIDE_ON_HALT ); //WY 2017.9.19修改 不自动切换频率
+  HCI_EXT_HaltDuringRfCmd(HCI_EXT_HALT_DURING_RF_DISABLE);//WY 2017.9.19添加 ENABLE会让RF期间停止MCU 所以关闭
 
 #if defined ( DC_DC_P0_7 )
 
@@ -1132,8 +1133,8 @@ static void NpiSerialCallback( uint8 port, uint8 events )
 
                 //释放申请的缓冲区  
                 //osal_mem_free(buffer);
-                
-                osal_start_timerEx( simpleBLEPeripheral_TaskID, TEST_EVT, 2 );
+                Delay_us(2000);
+                osal_start_timerEx( simpleBLEPeripheral_TaskID, TEST_EVT, 0 );
                 
                 //释放申请的缓冲区  
                 //osal_mem_free(buffer);  
