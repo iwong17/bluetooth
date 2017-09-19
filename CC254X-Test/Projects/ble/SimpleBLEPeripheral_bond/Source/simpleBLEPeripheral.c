@@ -679,8 +679,8 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
      //读取读取串口缓冲区数据，释放串口数据     
      NPI_ReadTransport(buffer,numBytes);
 
-     if(buffer[0] == 0x02 && buffer[numBytes-1] == 0x03)//判断帧头帧尾
-     {  
+     //if(buffer[0] == 0x02 && buffer[numBytes-1] == 0x03)//判断帧头帧尾
+     //{  
        //把收到的数据发送到串口-实现回环   
       NPI_WriteTransport(buffer, numBytes);
      
@@ -697,7 +697,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
      
         SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
       }
-     }
+     //}
         //释放申请的缓冲区  
         osal_mem_free(buffer);  
    }
@@ -1133,7 +1133,7 @@ static void NpiSerialCallback( uint8 port, uint8 events )
                 //释放申请的缓冲区  
                 //osal_mem_free(buffer);
                 
-                osal_start_timerEx( simpleBLEPeripheral_TaskID, TEST_EVT, 0 );
+                osal_start_timerEx( simpleBLEPeripheral_TaskID, TEST_EVT, 2 );
                 
                 //释放申请的缓冲区  
                 //osal_mem_free(buffer);  

@@ -13,4 +13,6 @@ extern void buzzerStop(void);
 extern void Timer1_Init(void);
 
 extern void Read_Mac(uint8 *ownAddress);
+
+void Delay_ms(unsigned short time);
 #endif
