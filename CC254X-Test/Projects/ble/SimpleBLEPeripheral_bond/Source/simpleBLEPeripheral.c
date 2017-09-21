@@ -58,8 +58,11 @@
 #include "npi.h"
 
 #include "app.h" //增加自己函数库
+#include "SPI.h"
 #include "Delay.h"
 #include "RF_Communication.h" //增加通讯协议
+#include "UART_Communication.h" //增加通讯协议
+#include "THM3070.H"
 
 #include "gapgattserver.h"
 #include "gattservapp.h"
@@ -321,6 +324,10 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   GPIOInit(); //关闭P1_3 LED灯
   
   NPI_InitTransport( NpiSerialCallback );//初始化串口
+  
+  SPI_Init();//SPI初始化
+  
+  THM_Init();
    
   // Setup the GAP
 //  VOID GAP_SetParamValue( TGAP_CONN_PAUSE_PERIPHERAL, DEFAULT_CONN_PAUSE_PERIPHERAL );
@@ -669,9 +676,11 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
  if ( events & NpiSerial_EVT )  
  {
    uint8 numBytes = 0;
-   uint16 nConnHandle; 
+   uint16 nConnHandle;
+   unsigned short cmdlen=0;//命令长度
+   unsigned char cmdflag=0;//命令标志
    numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节
-   
+  
    if(numBytes == 0)
    {
      return (events ^ NpiSerial_EVT);
@@ -690,7 +699,12 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
         {  
           //把收到的数据发送到串口-实现回环   
           NPI_WriteTransport(buffer, numBytes);
+          
+          cmdflag = 1;
+          cmdlen = buffer[1]*256+buffer[2];
+          CmdDeal(buffer,&cmdlen,&cmdflag);
      
+          /*
           uint8 nbDataPackage_Data[20];
           //初始化发送缓冲区  
           osal_memset(nbDataPackage_Data, 0xFF, 20); 
@@ -704,9 +718,10 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
      
             SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
           }
+          */
          }
          //释放申请的缓冲区  
-         osal_mem_free(buffer);  
+         osal_mem_free(buffer);
       }
    }
    return (events ^ NpiSerial_EVT);

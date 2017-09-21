@@ -76,6 +76,8 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 			HIDSendBuf[7+sendlen] = 0x03;
 			sendlen += 8;
 			USBSend();
+                        
+                        P1_3 = ~P1_3;
 			break;
 		}
 		case 01://´ò¿ªÔØ²¨
@@ -173,6 +175,7 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 			sendlen = sizeof(Ver)-1;
 			memcpy(HIDSendBuf,Ver,sendlen);
 			USBSend();
+                        
 			#undef Ver
 			break;
 		

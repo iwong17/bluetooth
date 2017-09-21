@@ -286,9 +286,8 @@ signed char SPI_Write(unsigned char add, unsigned char *buf,unsigned short len)
 	unsigned short i;
 	
 	TimeOut = 4200;
-	while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-
-	if(TimeOut == 0)return -1;
+	//while((UxCSR && CSR_ACTIVE) && --TimeOut);
+	//if(TimeOut == 0)return -1;
 	
 	SPI_CS = 1;
 	
@@ -297,15 +296,15 @@ signed char SPI_Write(unsigned char add, unsigned char *buf,unsigned short len)
 	
 	UxDBUF = add | 0x80;
 	TimeOut = 4200;
-	while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-	if(TimeOut == 0)return -2;
+	//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
+	//if(TimeOut == 0)return -2;
 	
 	for(i=0;i<len;i++)
 	{
 		UxDBUF = buf[i];
 		TimeOut = 4200;
-		while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-		if(TimeOut == 0)return -3;
+		//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
+		//if(TimeOut == 0)return -3;
 	}
 	
 	SPI_CS = 0;
@@ -320,8 +319,8 @@ signed char SPI_Read(unsigned char add, unsigned char *buf,unsigned short len)
 	unsigned short i;
 	
 	TimeOut = 4200;
-	while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-	if(TimeOut == 0)return -1;
+	//while((UxCSR && CSR_ACTIVE) && --TimeOut);
+	//if(TimeOut == 0)return -1;
 	
 	SPI_CS = 1;
 	
@@ -329,16 +328,16 @@ signed char SPI_Read(unsigned char add, unsigned char *buf,unsigned short len)
 	while(--TimeOut);
 
 	UxDBUF = add & 0x7f;
-	TimeOut = 4200;
-	while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-	if(TimeOut == 0)return -2;
+	//TimeOut = 4200;
+	//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
+	//if(TimeOut == 0)return -2;
 	
 	for(i=0;i<len;i++)
 	{
 		UxDBUF = 0x00;
 		TimeOut = 4200;
-		while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-		if(TimeOut == 0)return -4;
+		//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
+		//if(TimeOut == 0)return -4;
 		buf[i] = UxDBUF;
 	}
 	

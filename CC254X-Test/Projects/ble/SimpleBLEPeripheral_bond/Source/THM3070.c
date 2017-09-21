@@ -3,6 +3,11 @@
 #undef _THM3070_C_
 
 #include "hal_mcu.h"
+#include "npi.h"
+
+#define RTSN                            P1_0     
+#define STANDBY                         P1_1  
+#define MOD0                            P1_2
 
 //打开射频
 void THM_Open_RF(void)
@@ -35,22 +40,21 @@ static void ChangeProtBaud(unsigned char prot, unsigned char sndbaud, unsigned c
 
 void THM_PowerDown(void)
 {
-	P1 |= 0x02;
+	STANDBY = 1;
 }
 
 
 
 void THM_Init(void)
 {
-	//unsigned short i;
-	P1 |= 0x01;//SPIRST HIGH
+	RTSN = 1;//SPIRST HIGH
 	
-        P1 &= ~0x02; //初始化为非低功耗模式 LOW
-        P1 &= ~0x04; //使用SPI接口 LOW
+        STANDBY = 0;//初始化为非低功耗模式 LOW
+        MOD0 = 0;//使用SPI接口 LOW
 	Delay_ms(10);
-	P1 &= ~0x01; //SPIRST LOW
+	RTSN = 0;//SPIRST LOW
 	Delay_ms(10);
-	P1 |= 0x01;  //SPIRST HIGH
+	RTSN = 1;//SPIRST HIGH
 
 	//for(i=0;i<48000;i++);//短暂延时使芯片运行稳定
 	Delay_ms(50);
@@ -143,14 +147,11 @@ signed char THM_Read(unsigned char *buf,unsigned short *len)
 char THM_Write(unsigned char *buffer,unsigned short num)
 {
 	unsigned char temp = 0;	
-	unsigned long time = 120000000;//超时时间，48M为秒级
+	unsigned long time = 50000;//120000000;//超时时间，48M为秒级
 	
-	THM_ClrBuf();
-     
+        THM_ClrBuf();
 	SPI_Write(DATABUF,buffer,num);
-	
 	SPI_Write(SCON,"\x03",1);
-	
 	while((temp != 2) && (--time))//在超时时间内等待写完成
 	{ 
 		SPI_Read(TXFIN,&temp,1);
