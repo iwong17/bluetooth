@@ -58,6 +58,7 @@
 #include "npi.h"
 
 #include "app.h" //增加自己函数库
+#include "Delay.h"
 #include "RF_Communication.h" //增加通讯协议
 
 #include "gapgattserver.h"
@@ -237,7 +238,7 @@ static uint8 advertData[] =
 };
 
 // GAP GATT Attributes
-static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "Simple BLE Periphera2";
+static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "Simple BLE Periphera";
 
 /*********************************************************************
  * LOCAL FUNCTIONS
@@ -596,9 +597,6 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
   
    //功能码填充    
    nFunc = 0x80;         
-  
-   //有效数据填充  
-   //nbValidData[0] = 0;  
      
    //有效数据的长度  
    nValidData_Len = 0;  
@@ -668,41 +666,50 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    return (events ^ SBP_LED_ON_OFF_EVT);  
  }
 
- if ( events & TEST_EVT )  
+ if ( events & NpiSerial_EVT )  
  {
    uint8 numBytes = 0;
    uint16 nConnHandle; 
-   numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节  
-   //申请缓冲区buffer  
-   uint8 *buffer = osal_mem_alloc(numBytes);  
-   if(buffer)  
-   {  
-     //读取读取串口缓冲区数据，释放串口数据     
-     NPI_ReadTransport(buffer,numBytes);
-
-     //if(buffer[0] == 0x02 && buffer[numBytes-1] == 0x03)//判断帧头帧尾
-     //{  
-       //把收到的数据发送到串口-实现回环   
-      NPI_WriteTransport(buffer, numBytes);
-     
-      uint8 nbDataPackage_Data[20];
-      //初始化发送缓冲区  
-      osal_memset(nbDataPackage_Data, 0xFF, 20); 
-     
-      osal_memcpy(nbDataPackage_Data,buffer,numBytes);
-     
-      if(nbDataPackage_Data[0] != 0xFF)
-      {
-        //获得连接句柄  
-        GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);
-     
-        SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
-      }
-     //}
-        //释放申请的缓冲区  
-        osal_mem_free(buffer);  
+   numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节
+   
+   if(numBytes == 0)
+   {
+     return (events ^ NpiSerial_EVT);
    }
-   return (events ^ TEST_EVT);
+   else
+   {
+     
+      //申请缓冲区buffer  
+      uint8 *buffer = osal_mem_alloc(numBytes);  
+      if(buffer)//缓冲区申请成功  
+      {  
+        //读取读取串口缓冲区数据，释放串口数据     
+        NPI_ReadTransport(buffer,numBytes);
+
+        if(buffer[0] == 0x02 && buffer[numBytes-1] == 0x03)//判断帧头帧尾
+        {  
+          //把收到的数据发送到串口-实现回环   
+          NPI_WriteTransport(buffer, numBytes);
+     
+          uint8 nbDataPackage_Data[20];
+          //初始化发送缓冲区  
+          osal_memset(nbDataPackage_Data, 0xFF, 20); 
+     
+          osal_memcpy(nbDataPackage_Data,buffer,numBytes);
+     
+          if(nbDataPackage_Data[0] != 0xFF)
+          {
+            //获得连接句柄  
+            GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);
+     
+            SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
+          }
+         }
+         //释放申请的缓冲区  
+         osal_mem_free(buffer);  
+      }
+   }
+   return (events ^ NpiSerial_EVT);
  }
 
   // Discard unknown events
@@ -1097,49 +1104,8 @@ static void NpiSerialCallback( uint8 port, uint8 events )
   
     if (events & (HAL_UART_RX_TIMEOUT | HAL_UART_RX_FULL))   //串口有数据  
     {  
-        uint8 numBytes = 0;  
-  
-        numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节  
-          
-        if(numBytes == 0)  
-        {  
-            return;  
-        }  
-        else  
-        {  
-            //申请缓冲区buffer  
-            //uint8 *buffer = osal_mem_alloc(numBytes);  
-            //if(buffer)  
-            //{  
-                //读取读取串口缓冲区数据，释放串口数据     
-                //NPI_ReadTransport(buffer,numBytes);     
-  
-                //把收到的数据发送到串口-实现回环   
-                //NPI_WriteTransport(buffer, numBytes);
-     
-                //uint8 nbDataPackage_Data[20];
-                //初始化发送缓冲区  
-                //osal_memset(nbDataPackage_Data, 0xFF, 20); 
-     
-                //osal_memcpy(nbDataPackage_Data,buffer,numBytes);
-     
-                //if(nbDataPackage_Data[0] != 0xFF)
-                //{
-                  //获得连接句柄  
-                  //GAPRole_GetParameter(GAPROLE_CONNHANDLE, &nConnHandle);
-     
-                  //SimpleGATTprofile_Char4_Notify(nConnHandle,nbDataPackage_Data,20);
-                //}
-
-                //释放申请的缓冲区  
-                //osal_mem_free(buffer);
-                Delay_us(2000);
-                osal_start_timerEx( simpleBLEPeripheral_TaskID, TEST_EVT, 0 );
-                
-                //释放申请的缓冲区  
-                //osal_mem_free(buffer);  
-            //}  
-        }  
+       Delay_us(2000);
+       osal_start_timerEx( simpleBLEPeripheral_TaskID, NpiSerial_EVT, 0 );
     }  
 }
 

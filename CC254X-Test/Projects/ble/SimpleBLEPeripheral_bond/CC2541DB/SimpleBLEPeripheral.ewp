@@ -6440,6 +6440,9 @@
       <name>$PROJ_DIR$\..\Source\App.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\Source\Delay.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\Source\OSAL_SimpleBLEPeripheral.c</name>
     </file>
     <file>
@@ -6456,6 +6459,15 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\Source\SimpleBLEPeripheral_Main.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\SPI.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\THM3070.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\UART_Communication.c</name>
     </file>
   </group>
   <group>
