@@ -57,7 +57,8 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 	{
 		case 00:
 		{
-			signed char ret;;
+			signed char ret;
+                        unsigned char temp;
 			if(THM_Write(cmd+5,cmd[2]-7) == 0)//写命令成功后才能进行读操作
 			{
 				ret = THM_Read(HIDSendBuf+5,&sendlen);
@@ -76,8 +77,7 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 			HIDSendBuf[7+sendlen] = 0x03;
 			sendlen += 8;
 			USBSend();
-                        
-                        P1_3 = ~P1_3;
+                     
 			break;
 		}
 		case 01://打开载波
@@ -175,7 +175,6 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 			sendlen = sizeof(Ver)-1;
 			memcpy(HIDSendBuf,Ver,sendlen);
 			USBSend();
-                        
 			#undef Ver
 			break;
 		

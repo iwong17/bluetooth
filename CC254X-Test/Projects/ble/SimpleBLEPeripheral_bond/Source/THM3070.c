@@ -12,8 +12,8 @@
 //打开射频
 void THM_Open_RF(void)
 {
-	SPI_Write(TXCON,"\x62",1);
-	Delay_ms(100);										//时间长度可以延长	Delay_ms(2)；
+  SPI_Write(TXCON,"\x62",1);
+  Delay_ms(100);   //时间长度可以延长	Delay_ms(2)；
 }
 
 	
@@ -55,8 +55,6 @@ void THM_Init(void)
 	RTSN = 0;//SPIRST LOW
 	Delay_ms(10);
 	RTSN = 1;//SPIRST HIGH
-
-	//for(i=0;i<48000;i++);//短暂延时使芯片运行稳定
 	Delay_ms(50);
 	
 	SPI_Write(FCONB,"\x2a",1);
@@ -97,10 +95,10 @@ void THM_ClrBuf(void)
 	
 	SPI_Write(RSTAT,"\x00",1);*/
 	
-	temp = 5;
+	temp = 5;//收发缓冲区清空
 	SPI_Write(SCON,&temp,1);
 	Delay_ms(5);
-	temp = 1;
+	temp = 1;//打开射频载波
 	SPI_Write(SCON,&temp,1);
 	
 }
@@ -109,13 +107,14 @@ void THM_ClrBuf(void)
 signed char THM_Read(unsigned char *buf,unsigned short *len)
 {
 	unsigned char temp = 0;
-	unsigned long time = 240000000;//超时时间，48M为秒级
+	unsigned long time = 100000;//240000000;//超时时间，48M为秒级
 	
 	*len = 0;
 	while ((temp==0) && --time)//判断	RSTAT 寄存器的最高位是否置位，最高位的置位比其他位的置位晚。加上超时防止死机
 	{ 
 		SPI_Read(RSTAT,&temp,1);//读取接收状态
-  } 
+                
+        }
 	//printf("zhuangtai :%x\n",temp); 
 	if(time == 0)//超时，主控芯片判断的不精确超时，超时时间为秒级
 	{
@@ -123,14 +122,14 @@ signed char THM_Read(unsigned char *buf,unsigned short *len)
 	}
 	if(temp & 0x01)//正确
 	{		    
-		SPI_Read(RSCL,&temp,1);
+		SPI_Read(RSCL,&temp,1);//发送低字节数
 		*len = temp;
-		SPI_Read(RSCH,&temp,1);
+		SPI_Read(RSCH,&temp,1);//发送高字节数
 		*len += temp*256;
 		if(*len == 0)
 			return 0; 
 		SPI_Read(0,buf,*len);	
-		return *len;       					 //*len += (unsigned short)temp << 8;
+		return *len;          //*len += (unsigned short)temp << 8;
 	}
 	else if(temp & 4)//超时				
 		return (signed char)-1;
@@ -146,15 +145,16 @@ signed char THM_Read(unsigned char *buf,unsigned short *len)
 		 
 char THM_Write(unsigned char *buffer,unsigned short num)
 {
-	unsigned char temp = 0;	
-	unsigned long time = 50000;//120000000;//超时时间，48M为秒级
+	unsigned char temp = 0;
+        unsigned char temp1 = 0;	
+	unsigned long time = 100000;//120000000;//超时时间，48M为秒级
 	
         THM_ClrBuf();
-	SPI_Write(DATABUF,buffer,num);
-	SPI_Write(SCON,"\x03",1);
+	SPI_Write(DATABUF,buffer,num);//写入数据
+	SPI_Write(SCON,"\x03",1);     //发送接收开始
 	while((temp != 2) && (--time))//在超时时间内等待写完成
 	{ 
-		SPI_Read(TXFIN,&temp,1);
+		SPI_Read(TXFIN,&temp,1);//发生完成
 	}
 	
 	if(time == 0)//主控芯片判断的不精确超时

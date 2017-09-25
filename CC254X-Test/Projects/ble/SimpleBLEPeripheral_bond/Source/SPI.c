@@ -4,7 +4,9 @@
 #include <ioCC2541.h>                 
 #include "spi.h"     
 #include "OSAL.h"  
-#include "hal_mcu.h"  
+#include "hal_mcu.h" 
+#include "Delay.h"
+#include "npi.h"
 #include <string.h>  
 //******************************************************************************  
 //                      MACROS  
@@ -13,45 +15,7 @@
 #define SPI_CS                          P1_4     
 #define SPI_CLK                         P1_5  
 #define SPI_MOSI                        P1_6   
-#define SPI_MISO                        P1_7  
-  
-  
-//寄存器  
-#define UxCSR                           U1CSR  
-#define UxUCR                           U1UCR  
-#define UxDBUF                          U1DBUF  
-#define UxBAUD                          U1BAUD  
-#define UxGCR                           U1GCR  
-  
-  
-#define PxSEL                           P1SEL  
-#define HAL_UART_PERCFG_BIT             0x02         // USART1 on P1, Alt-2; so set this bit.  
-#define HAL_UART_PRIPO                  0x40         // USART1 priority over UART0.  
-#define HAL_UART_Px_SEL_S               0xF0         // Peripheral I/O Select for Slave: SO/SI/CLK/CSn.  
-#define HAL_UART_Px_SEL_M               0xE0         // Peripheral I/O Select for Master: MI/MO/CLK.  
-  
-  
-// UxCSR - USART Control and Status Register.  
-#define CSR_MODE                        0x80  
-#define CSR_RE                          0x40  
-#define CSR_SLAVE                       0x20  
-#define CSR_FE                          0x10  
-#define CSR_ERR                         0x08  
-#define CSR_RX_BYTE                     0x04  
-#define CSR_TX_BYTE                     0x02  
-#define CSR_ACTIVE                      0x01  
-  
-  
-// UxUCR - USART UART Control Register.  
-#define UCR_FLUSH                       0x80  
-#define UCR_FLOW                        0x40  
-#define UCR_D9                          0x20  
-#define UCR_BIT9                        0x10  
-#define UCR_PARITY                      0x08  
-#define UCR_SPB                         0x04  
-#define UCR_STOP                        0x02  
-#define UCR_START                       0x01  
-  
+#define SPI_MISO                        P1_7   
   
 //其他  
 #define uint8                           unsigned char    
@@ -147,53 +111,6 @@ static uint8 SPI_Packet_Receive(void);
 static SPI_RXSTATUS SPI_Rx_Resolution(void);
 static SPI_RXSTATUS SPI_Status_Judge(uint8 status);
 static void SPI_Status_Deal(SPI_RXSTATUS status);
-  
-//******************************************************************************  
-//name:         test  
-//introduce:    测试  
-//parameter:    none  
-//return:       none  
-//******************************************************************************  
-/*  
-volatile uint8 tx_buf[256] = {0};  
-volatile uint8 rx_buf[256] = {0};  
-volatile uint8 tx_index = 0;  
-volatile uint8 rx_index = 0;  
-*/  
-uint8 tx_buf[256] = {0};  
-uint8 rx_buf[256] = {0};  
-uint8 tx_index = 0;  
-uint8 rx_index = 0;  
-  
-  
-void test_init(void)  
-{  
-  uint16 i = 0;  
-    
-  for(i = 0; i < 256; i++)  
-  {  
-    tx_buf[i] = i;  
-  }  
-  
-  
-}  
-void test(void)  
-{  
-  volatile uint8 aa = 0;  
-  
-  
-  rx_buf[rx_index] = UxDBUF;  
-  UxDBUF = tx_buf[tx_index];  
-  
-  
-  if(rx_buf[rx_index] == tx_buf[rx_index]){  
-    rx_index++;  
-    tx_index++;  
-  }  
-  else{  
-    aa =0x38;  
-  }  
-}
 
 //******************************************************************************  
 //name:         SPI_Init  
@@ -202,41 +119,111 @@ void test(void)
 //return:       none  
 //******************************************************************************  
 void SPI_Init(void)  
-{  
-  volatile uint8 receive = 0;  
-    
-  PERCFG |= HAL_UART_PERCFG_BIT;        // Set UART1 I/O to Alt. 2 location on P1.  
+{      
+  PERCFG |= 0x02;                       // Set UART1 I/O to Alt. 2 location on P1.  
   
-  PxSEL |= HAL_UART_Px_SEL_S;           // 端口设置. Peripheral I/O Select for Slave: SO/SI/CLK/CSn.  
-  UxCSR = (0<<7) | (0<<5);              // 模式设置，Mode is SPI-Master Mode.  
-   
-  UxUCR = UCR_FLUSH;                    // 清除单元 Flush it.  
-    
-  UxGCR |= (1 << 5);                    // 设置传送位顺序 Set bit order to MSB.    
-  UxGCR |= (1 << 6);                    // CPHA 设置SPI时钟相位 
-  UxGCR |= (1 << 7);                    // CPOL 设置SPI的时钟极性为正  
-    
-  TCON &= ~(1 << 7);                    //清空usart1接收中断标志位  
-  IEN0 |= (1 << 3);                     //使能usart1接收中断   
-    
-  IP0 |= (1 << 3);                      //设置spi的中断组为等级3    
-  //IP0 &= ~(1 << 3);                   //设置spi的中断组为等级2  
-  IP1 |= (1 << 3);    
+  P1SEL |= 0xE0;                        // 端口设置. Peripheral I/O Select for Master: SO/SI/CLK.  
+  P1SEL &= ~0x10;                       // P1_4 is GPIO (SSN) 
+  P1DIR |= 0x10;                        // SSN is set as output  
+  SPI_CS = 1;
+  
+  U1BAUD = 0xB2;                        // 106000 BAUD_M = 178
+  U1GCR |= 0x0B;                        //        BAUD_E = 11
+  
+  U1UCR |= 0x80;                        // 清除单元 Flush it.  
+  U1GCR |= (1 << 5);                    // 设置传送位顺序 Set bit order to MSB.    
+  U1GCR |= (0 << 6);                    // CPHA 设置SPI时钟相位 
+  U1GCR |= (0 << 7);                    // CPOL 设置SPI的时钟极性  
       
-  UxCSR |= CSR_RE;                      //使能  
-  
-  receive = UxDBUF;                     //读寄存器，防止里面有残留数据       
-    
-  SPI_Response_Byte(RESPONSE_RECEIVING);//将0xF4写入发送寄存器中待发送   
-  
-  SPI_Malloc_DATA();                    //分配内存  
-    
-  //测试！！！！！！！  
-  //test_init();  
+  U1CSR |= 0x40;                        //接收器使能  
+}
+
+/*********************SPI写命令************************************/ 
+signed char SPI_Write(unsigned char add, unsigned char *buf,unsigned short len)
+{
+	unsigned short TimeOut;
+	unsigned short i;
+	
+	TimeOut = 10000;//1ms
+	while(U1ACTIVE==1 && --TimeOut);
+	if(TimeOut == 0)
+        {     
+          return -1;
+        }
+	SPI_CS = 0;//读写前拉低电平
+	
+	TimeOut = 6;
+	while(--TimeOut);
+	
+	U1DBUF = add | 0x80;
+        Delay_us(100);
+	TimeOut = 10000;
+	while(U1TX_BYTE==0 && --TimeOut);//0：字节没有传送
+	if(TimeOut == 0)
+        {
+          return -2;
+        }
+	
+	for(i=0;i<len;i++)
+	{
+		U1DBUF = buf[i];
+		Delay_us(100);
+                TimeOut = 10000;
+		while(U1TX_BYTE==0 && --TimeOut);//0：字节没有传送
+		if(TimeOut == 0)
+                {
+                  return -3;
+                }
+	}
+	SPI_CS = 1;//读写后拉高电平
+	return 0;
+}
+
+/*********************SPI读命令************************************/
+signed char SPI_Read(unsigned char add, unsigned char *buf,unsigned short len)
+{
+	unsigned short TimeOut;
+	unsigned short i;
+
+	TimeOut = 10000;
+	while(U1ACTIVE==1 && --TimeOut);
+	if(TimeOut == 0)
+        {
+          return -1;
+        }
+	
+	SPI_CS = 0;//读写前拉低电平
+	
+	Delay_us(1);
+
+	U1DBUF = add & 0x7f;
+        Delay_us(100);
+	TimeOut = 10000;
+	while(U1TX_BYTE==0 && --TimeOut);
+	if(TimeOut == 0)
+        {
+          return -2;
+        }
+	
+	for(i=0;i<len;i++)
+	{
+		U1DBUF = 0x00;
+		TimeOut = 10000;
+                Delay_us(100);
+		while(U1TX_BYTE==0 && --TimeOut);
+		if(TimeOut == 0)
+                {
+                  return -4;
+                }
+		buf[i] = U1DBUF;
+	}
+	
+	SPI_CS = 1;//读写后拉高电平
+	return 0;
 }
 
 /*********************SPI写字节************************************/ 
-void SPI_SendByte(unsigned char dat)     
+void SPI_SendByte(unsigned char dat)//LCD驱动    
 {
     unsigned char i=8, temp=0;
     for(i=0;i<8;i++) //发送一个八位数据 
@@ -258,7 +245,7 @@ void SPI_SendByte(unsigned char dat)
 }
 
 /*********************SPI读字节************************************/ 
-uint8 SPI_ReadByte(void)
+uint8 SPI_ReadByte(void)//LCD驱动
 {
     unsigned char i=0, in=0, temp=0;
 
@@ -279,73 +266,6 @@ uint8 SPI_ReadByte(void)
     return in;
 }
 
-/*********************SPI写命令************************************/ 
-signed char SPI_Write(unsigned char add, unsigned char *buf,unsigned short len)
-{
-	unsigned short TimeOut;
-	unsigned short i;
-	
-	TimeOut = 4200;
-	//while((UxCSR && CSR_ACTIVE) && --TimeOut);
-	//if(TimeOut == 0)return -1;
-	
-	SPI_CS = 1;
-	
-	TimeOut = 6;
-	while(--TimeOut);
-	
-	UxDBUF = add | 0x80;
-	TimeOut = 4200;
-	//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-	//if(TimeOut == 0)return -2;
-	
-	for(i=0;i<len;i++)
-	{
-		UxDBUF = buf[i];
-		TimeOut = 4200;
-		//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-		//if(TimeOut == 0)return -3;
-	}
-	
-	SPI_CS = 0;
-	
-	return 0;
-}
-
-/*********************SPI读命令************************************/
-signed char SPI_Read(unsigned char add, unsigned char *buf,unsigned short len)
-{
-	unsigned short TimeOut;
-	unsigned short i;
-	
-	TimeOut = 4200;
-	//while((UxCSR && CSR_ACTIVE) && --TimeOut);
-	//if(TimeOut == 0)return -1;
-	
-	SPI_CS = 1;
-	
-	TimeOut = 6;
-	while(--TimeOut);
-
-	UxDBUF = add & 0x7f;
-	//TimeOut = 4200;
-	//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-	//if(TimeOut == 0)return -2;
-	
-	for(i=0;i<len;i++)
-	{
-		UxDBUF = 0x00;
-		TimeOut = 4200;
-		//while((UxCSR&&CSR_ACTIVE) && --TimeOut);
-		//if(TimeOut == 0)return -4;
-		buf[i] = UxDBUF;
-	}
-	
-	SPI_CS = 0;
-	
-	return 0;
-}
- 
 //******************************************************************************  
 //name:         SPI_Response_Byte  
 //introduce:    SPI从机应答函数  
@@ -354,7 +274,7 @@ signed char SPI_Read(unsigned char add, unsigned char *buf,unsigned short len)
 //******************************************************************************  
 static void SPI_Response_Byte(SPI_RESPONSE_BYTE tx)   
 {  
-  UxDBUF = tx;                          //写到寄存器里  
+  U1DBUF = tx;                          //写到寄存器里  
 }    
   
 //******************************************************************************  
@@ -497,8 +417,7 @@ static SPI_RXSTATUS SPI_Rx_Resolution(void)
   }  
     
    
-}  
-  
+} 
   
 //******************************************************************************  
 //name:         SPI_Packet_Receive  
@@ -508,7 +427,7 @@ static SPI_RXSTATUS SPI_Rx_Resolution(void)
 //******************************************************************************  
 static uint8 SPI_Packet_Receive(void)   
 {  
-    uint8 ch = UxDBUF;          //接收数据                  
+    uint8 ch = U1DBUF;          //接收数据                  
       
     switch (spiRxSte)  
     {  
@@ -661,7 +580,7 @@ __interrupt void SPI_Rx_ISR(void)
   HAL_ENTER_ISR();       
   
   
-  if(UxCSR & CSR_RX_BYTE){          //receive a byte   
+  if(U1RX_BYTE){          //receive a byte   
   
   
      //test();       

@@ -13,12 +13,12 @@
 void GPIOInit(void)
 {
     //P0SEL = 0xc0;   // Configure Port 0 as GPIO
-    P1SEL |= 0xF0;    // Configure Port 1(0~3) as GPIO,(4~7) as SPI
+    P1SEL |= 0xE0;    // Configure Port 1(0~4) as GPIO,(5~7) as SPI
     //P2SEL = 0;      // Configure Port 2 as GPIO
 
     //P0DIR = 0xFF;   // Port 0 pins P0.0 and P0.1 as input (buttons),
                       // all others (P0.2-P0.7) as output
-    P1DIR = 0x7F;     // All port 1 pins (P1.0-P1.7) as output
+    P1DIR |= 0x1F;     // All port 1 pins (P1.4-P1.7) as output
     //P2DIR = 0x1F;   // All port 1 pins (P2.0-P2.4) as output
 
     //P0 = 0x0c;      

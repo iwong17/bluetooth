@@ -327,7 +327,9 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   
   SPI_Init();//SPI初始化
   
-  THM_Init();
+  THM_Init();//THM初始化
+  
+  THM_Open_RF();//打开射频
    
   // Setup the GAP
 //  VOID GAP_SetParamValue( TGAP_CONN_PAUSE_PERIPHERAL, DEFAULT_CONN_PAUSE_PERIPHERAL );
@@ -698,7 +700,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
         if(buffer[0] == 0x02 && buffer[numBytes-1] == 0x03)//判断帧头帧尾
         {  
           //把收到的数据发送到串口-实现回环   
-          NPI_WriteTransport(buffer, numBytes);
+          //NPI_WriteTransport(buffer, numBytes);
           
           cmdflag = 1;
           cmdlen = buffer[1]*256+buffer[2];
