@@ -675,7 +675,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    return (events ^ SBP_LED_ON_OFF_EVT);  
  }
 
- if ( events & NpiSerial_EVT )  
+ if ( events & NpiSerial_EVT )//串口回调事件  
  {
    uint8 numBytes = 0;
    uint16 nConnHandle;
@@ -704,7 +704,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
           
           cmdflag = 1;
           cmdlen = buffer[1]*256+buffer[2];
-          CmdDeal(buffer,&cmdlen,&cmdflag);
+          CmdDeal(buffer,&cmdlen,&cmdflag);//串口命名处理函数
      
           /*
           uint8 nbDataPackage_Data[20];
@@ -727,6 +727,43 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
       }
    }
    return (events ^ NpiSerial_EVT);
+ }
+ 
+ if ( events & SBP_UPDATE_SCAN_RSP_DATA_EVT )        //更改设备名事件    
+ {   
+    uint8 scanRspData_Update[] =    
+    {    
+      0x07,     //自定义设备名的长度    
+      GAP_ADTYPE_LOCAL_NAME_COMPLETE,    
+      0x47,     //G    
+      0x55,     //U    
+      0x41,     //A    
+      0x3A,     //：    
+      0x00,     //空格    
+      0x00,     //空格    
+  
+      // connection interval range  
+      0x05,   // length of this data  
+      GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,  
+      LO_UINT16( DEFAULT_DESIRED_MIN_CONN_INTERVAL ),   // 100ms  
+      HI_UINT16( DEFAULT_DESIRED_MIN_CONN_INTERVAL ),  
+      LO_UINT16( DEFAULT_DESIRED_MAX_CONN_INTERVAL ),   // 1s  
+      HI_UINT16( DEFAULT_DESIRED_MAX_CONN_INTERVAL ),  
+  
+      // Tx power level  
+      0x02,   // length of this data  
+      GAP_ADTYPE_POWER_LEVEL,  
+      0       // 0dBm    
+    };       
+    GAP_UpdateAdvertisingData(simpleBLEPeripheral_TaskID,     
+                             FALSE,    
+                             sizeof(scanRspData_Update),    
+                             scanRspData_Update );      //更新扫描应答数据
+    
+    uint8 initial_advertising_enable = TRUE;    
+    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_enable );//开广播    
+     
+    return (events ^ SBP_UPDATE_SCAN_RSP_DATA_EVT);
  }
 
   // Discard unknown events

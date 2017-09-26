@@ -6469,6 +6469,9 @@
     <file>
       <name>$PROJ_DIR$\..\Source\UART_Communication.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\WatchDog.c</name>
+    </file>
   </group>
   <group>
     <name>HAL</name>

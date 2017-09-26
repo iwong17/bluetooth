@@ -120,10 +120,10 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 			USBSend();
 			break;
 		case 6:
-			SPI_Write(TXDP1,cmd+5,1);
-			SPI_Write(TXDP0,cmd+6,1);
-			SPI_Write(TXDN1,cmd+7,1);
-			SPI_Write(TXDN0,cmd+8,1); 
+			SPI_Write(TXDP1,cmd+5,1);//输出载波时PMOS驱动高电平时的输出电阻
+			SPI_Write(TXDP0,cmd+6,1);//输出调制时PMOS驱动高电平时的输出电阻
+			SPI_Write(TXDN1,cmd+7,1);//输出载波时PMOS驱动低电平时的输出电阻
+			SPI_Write(TXDN0,cmd+8,1);//输出调制时PMOS驱动低电平时的输出电阻
 			sendlen = 2;
 			HIDSendBuf[0] = 'O';
 			HIDSendBuf[1] = 'K';
@@ -137,7 +137,7 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 		break;
 		
 		case 8:
-			THM_Init();
+			THM_Init();//THM初始化
 			HIDSendBuf[0] = 'O';
 			HIDSendBuf[1] = 'K';
 			sendlen = 2;
@@ -146,12 +146,12 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 		
 		case 9:
 
-			P1 |= 0x01;//复位芯片
+			RTSN = 1;//复位芯片
 
 		break;
 		
 		case 0x0a:
-			THM_PowerDown();
+			THM_PowerDown();//低功耗
 			sendlen = 2;
 			HIDSendBuf[0] = 'O';
 			HIDSendBuf[1] = 'K';
@@ -159,9 +159,9 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 		break;
 		
 		case 0x0b:
-			P1 &= ~0x01;
+			RTSN = 0;
 			Delay_ms(20);
-			P1 |= 0x01;//复位芯片
+			RTSN = 1;//复位芯片
 			THM_Init();
 			THM_Open_RF();
 			sendlen = 2;
