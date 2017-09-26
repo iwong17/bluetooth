@@ -141,9 +141,8 @@ void Timer1_Init(void)
 //input:        mac需要保存到的位置，需要6个字节大小  
 //return:       none  
 //**************************************************  
-void Read_Mac(uint8 *ownAddress)     //读本机MAC 在初始化时不能通过
-                                     //GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddress);去读取MAC，因为此时MAC还没有写入到该变量中 
-{  
+void Read_Mac(uint8 *ownAddress)     //读本机MAC 在初始化时不能通过                                    
+{                                    //GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddress);去读取MAC，因为此时MAC还没有写入到该变量中   
   ownAddress[5] = *(unsigned char *)(0x780E); // 直接指向指针内容     
   ownAddress[4] = *(unsigned char *)(0x780F);    
   ownAddress[3] = *(unsigned char *)(0x7810);    
