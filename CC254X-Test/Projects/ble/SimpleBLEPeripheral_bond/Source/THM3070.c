@@ -145,8 +145,7 @@ signed char THM_Read(unsigned char *buf,unsigned short *len)
 		 
 char THM_Write(unsigned char *buffer,unsigned short num)
 {
-	unsigned char temp = 0;
-        unsigned char temp1 = 0;	
+	unsigned char temp = 0;	
 	unsigned long time = 100000;//120000000;//超时时间，48M为秒级
 	
         THM_ClrBuf();

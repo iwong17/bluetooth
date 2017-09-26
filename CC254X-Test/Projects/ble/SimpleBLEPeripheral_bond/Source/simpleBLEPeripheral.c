@@ -992,6 +992,15 @@ static void performPeriodicTask( void )
      */
     //SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
   }
+  
+   if (gapProfileState == GAPROLE_CONNECTED)//判断蓝牙是否有连接
+   {
+     HalLedSet(HAL_LED_1, HAL_LED_MODE_OFF );
+   }
+   else
+   {
+     HalLedSet(HAL_LED_1, HAL_LED_MODE_FLASH );
+   }
 }
 
 /*********************************************************************
@@ -1109,28 +1118,32 @@ static void ProcessPairStateCB( uint16 connHandle, uint8 state, uint8 status )
 {
   if ( state == GAPBOND_PAIRING_STATE_STARTED )/*主机发起连接，会进入开始绑定状态*/
   {
-    HalLcdWriteString( "Pairing started", HAL_LCD_LINE_1 );
+        HalLcdWriteString( "Pairing started", HAL_LCD_LINE_1 );
 	gPairStatus = 0;
   }
   else if ( state == GAPBOND_PAIRING_STATE_COMPLETE )/*当主机提交密码后，会进入完成*/
   {
     if ( status == SUCCESS )
     {
-      HalLcdWriteString( "Pairing success", HAL_LCD_LINE_1 );/*密码正确*/
+          HalLcdWriteString( "Pairing success", HAL_LCD_LINE_1 );/*密码正确*/
 	  gPairStatus = 1;
     }
     else
     {
-      HalLcdWriteStringValue( "Pairing fail", status, 10, HAL_LCD_LINE_1 );/*密码不正确，或者先前已经绑定*/
-	  if(status ==8){/*已绑定*/
+          HalLcdWriteStringValue( "Pairing fail", status, 10, HAL_LCD_LINE_1 );/*密码不正确，或者先前已经绑定*/
+	  if(status ==8)
+          {/*已绑定*/
 		gPairStatus = 1;
-	  }else{
+	  }
+          else
+          {
 		gPairStatus = 0;
 	  }
-    }
-	//判断配对结果，如果不正确立刻停止连接。
-	if(simpleBLEState == BLE_STATE_CONNECTED && gPairStatus !=1){
-	  GAPRole_TerminateConnection();  // 终止连接
+     }
+     //判断配对结果，如果不正确立刻停止连接。
+    if(simpleBLEState == BLE_STATE_CONNECTED && gPairStatus !=1)
+    {
+      GAPRole_TerminateConnection();  // 终止连接
       // 终止连接后， 需要复位从机
     }
   }

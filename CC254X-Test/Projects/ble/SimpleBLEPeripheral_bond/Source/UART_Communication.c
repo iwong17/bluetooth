@@ -14,7 +14,9 @@ unsigned short sendlen=0;	//待发送数据长度
 unsigned char HIDsendflag=0;	//1：还有数据待发送
 unsigned char HIDSendBuf[128];
 
-
+#define RTSN                            P1_0     
+#define STANDBY                         P1_1  
+#define MOD0                            P1_2
 
 void USBSend(void)//结果发送
 {
@@ -58,7 +60,6 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 		case 00:
 		{
 			signed char ret;
-                        unsigned char temp;
 			if(THM_Write(cmd+5,cmd[2]-7) == 0)//写命令成功后才能进行读操作
 			{
 				ret = THM_Read(HIDSendBuf+5,&sendlen);

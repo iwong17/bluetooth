@@ -1,5 +1,7 @@
 #include "hal_mcu.h"
-#include "App.h" 
+#include "App.h"
+#include "hci.h"
+
 
 //******************************************************************************          
 //name:             GPIOInit          
@@ -25,6 +27,7 @@ void GPIOInit(void)
     P1 |= 0x08;       // P1.3 low
     //P2 = 0;         
 }
+
 //******************************************************************************          
 //name:             buzzerInit          
 //introduce:        蜂鸣器初始化        
@@ -149,4 +152,15 @@ void Read_Mac(uint8 *ownAddress)     //读本机MAC 在初始化时不能通过
   ownAddress[2] = XREG(0x7811);                // define 函数直接读出数据     
   ownAddress[1] = XREG(0x7812);    
   ownAddress[0] = XREG(0x7813);   
-} 
+}
+//**************************************************  
+//name:         Write_Mac  
+//input:        设备MAC地址  
+//return:       none  
+//**************************************************  
+void Write_Mac(uint8 *bdAddr)    //primary MAC只读，secondary可读可写                                    
+{  
+  uint8 status;
+  status = HCI_EXT_SetBDADDRCmd(bdAddr);
+}
+
