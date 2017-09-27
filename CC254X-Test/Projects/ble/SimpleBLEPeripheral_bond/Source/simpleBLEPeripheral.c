@@ -100,7 +100,7 @@
 #define ATTRTBL_CHAR6_CCC_IDX               19
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   5000
+#define SBP_PERIODIC_EVT_PERIOD                   1000 //原先为5000
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -993,14 +993,14 @@ static void performPeriodicTask( void )
     //SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
   }
   
-   if (gapProfileState == GAPROLE_CONNECTED)//判断蓝牙是否有连接
-   {
-     HalLedSet(HAL_LED_1, HAL_LED_MODE_OFF );
-   }
-   else
-   {
-     HalLedSet(HAL_LED_1, HAL_LED_MODE_FLASH );
-   }
+  if (gapProfileState == GAPROLE_CONNECTED)//判断蓝牙是否有连接，连接后关闭LED
+  {
+	LED3 = 0;
+  }
+  else//未连接的时候LED闪烁
+  {
+	LED3 = ~LED3;
+  }
 }
 
 /*********************************************************************

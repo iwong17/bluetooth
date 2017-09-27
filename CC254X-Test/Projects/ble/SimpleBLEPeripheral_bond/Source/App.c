@@ -27,7 +27,22 @@ void GPIOInit(void)
     P1 |= 0x08;       // P1.3 low
     //P2 = 0;         
 }
-
+//******************************************************************************          
+//name:             LEDInit          
+//introduce:        LED初始化        
+//parameter:        none         
+//return:           none
+//changetime:       2017.09.27
+//author:           
+//******************************************************************************
+void LEDInit(void)
+{
+    P0SEL &= ~0x03;//设定P0_0 P0_1为GPIO
+    P0DIR |= 0x03;
+    LED1 = 0;
+    LED2 = 0;
+}
+ 
 //******************************************************************************          
 //name:             buzzerInit          
 //introduce:        蜂鸣器初始化        
@@ -38,14 +53,14 @@ void GPIOInit(void)
 //******************************************************************************  
 void buzzerInit(void)
 {
-    // Buzzer connected at P1_6
+    // Buzzer connected at P0_2
     // We will use Timer 3 Channel 0 at alternate location 2
     // Channel 0 will toggle on compare with 0 and counter will
     // count in up/down mode to T3CC0.
 
     PERCFG |= 0x20;             // Timer 3 Alternate location 2
-    P1DIR |= 0x40;              // P1_6 = output
-    P1SEL |= 0x40;              // Peripheral function on P1_6
+    P0DIR |= 0x04;              // P0_2 = output
+    P0SEL |= 0x04;              // Peripheral function on P0_2
 
     T3CTL &= ~0x10;             // Stop timer 3 (if it was running)
     T3CTL |= 0x04;              // Clear timer 3

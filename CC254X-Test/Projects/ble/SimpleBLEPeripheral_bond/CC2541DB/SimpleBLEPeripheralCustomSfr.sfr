@@ -130,7 +130,6 @@ sfr = "T4CC1",	"SFR",	0xef,	1,	base=16,	modified
 sfr = "TIMIF",	"SFR",	0xd8,	1,	base=16,	modified
 sfr = "U0CSR",	"SFR",	0x86,	1,	base=16,	modified
 sfr = "U0UCR",	"SFR",	0xc4,	1,	base=16,	modified
-sfr = "U0GCR",	"SFR",	0xc5,	1,	base=16,	modified
 sfr = "U0DBUF",	"SFR",	0xc1,	1,	base=16,	modified
 sfr = "U0BAUD",	"SFR",	0xc2,	1,	base=16,	modified
 sfr = "U0BAUD.BAUD_M",	"SFR",	0xc2,	1,	base=16,	modified
@@ -241,6 +240,14 @@ sfr = "I2CDATA",	"XData",	0x6232,	1,	base=16,	modified
 sfr = "I2CADDR",	"XData",	0x6233,	1,	base=16,	modified
 sfr = "I2CWC",	"XData",	0x6234,	1,	base=16,	modified
 sfr = "I2CIO",	"XData",	0x6235,	1,	base=16,	modified
+sfr = "RFERRF.RXUNDERF",	"SFR",	0xbf,	1,	base=16,	modified
+sfr = "SLEEPSTA.RST",	"SFR",	0x9d,	1,	base=16,	modified
+sfr = "T1CCTL2.CAP",	"SFR",	0xe7,	1,	base=16,	modified
+sfr = "T2CTRL.TIMER2_SYNC",	"SFR",	0x94,	1,	base=16,	modified
+sfr = "T3CTL.OVFIM",	"SFR",	0xcb,	1,	base=16,	modified
+sfr = "T3CCTL0.CMP",	"SFR",	0xcc,	1,	base=16,	modified
+sfr = "U0GCR",	"SFR",	0xc5,	1,	base=16,	modified
+sfr = "U0GCR",	"SFR",	0xc5,	1,	base=16,	modified
 
 
 [SfrGroupInfo]
@@ -265,23 +272,23 @@ group = "Custom", "T1CCTL4", "T1CC4H", "T1CC4L", "IRCTL", "T2MSEL", "T2M0"
 group = "Custom", "T2M1", "T2MOVF0", "T2MOVF1", "T2MOVF2", "T2IRQF", "T2IRQM"
 group = "Custom", "T2CTRL", "T2EVTCFG", "T3CNT", "T3CTL", "T3CCTL0", "T3CC0"
 group = "Custom", "T3CCTL1", "T3CC1", "T4CNT", "T4CTL", "T4CCTL0", "T4CC0"
-group = "Custom", "T4CCTL1", "T4CC1", "TIMIF", "U0CSR", "U0UCR", "U0GCR"
-group = "Custom", "U0DBUF", "U0BAUD", "U0BAUD.BAUD_M", "U1CSR", "U1UCR", "U1GCR"
-group = "Custom", "U1DBUF", "U1BAUD", "U1BAUD.BAUD_M", "WDCTL", "FCTL", "FADDRL"
-group = "Custom", "FADDRH", "FWDATA", "FRMCTRL0", "RFIRQM0", "RFIRQM1", "RFERRM"
-group = "Custom", "FREQCTRL", "FREQTUNE", "TXPOWER", "TXPOWER.PA_POWER", "TXCTRL", "LLESTAT"
-group = "Custom", "SEMAPHORE0", "SEMAPHORE1", "SEMAPHORE2", "RFSTAT", "RSSI", "RFPSRND"
-group = "Custom", "RFPSRND.RNG_DOUT", "MDMCTRL0", "MDMCTRL1", "MDMCTRL2", "MDMCTRL3", "SW_CONF"
-group = "Custom", "SW0", "SW1", "SW2", "SW3", "SW4", "SW5"
-group = "Custom", "SW6", "SW7", "DC_I_L", "DC_I_H", "DC_Q_L", "DC_Q_H"
-group = "Custom", "FREQEST", "RXCTRL", "FSCTRL", "LNAGAIN", "AAFGAIN", "ADCTEST0"
-group = "Custom", "MDMTEST0", "MDMTEST1", "DACTEST0", "ATEST", "RFC_OBS_CTRL0", "RFC_OBS_CTRL1"
-group = "Custom", "RFC_OBS_CTRL2", "LLECTRL", "TXFILTCFG", "RFRND", "RFRND.RND", "RFRAMCFG"
-group = "Custom", "RFFDMA0", "RFFDMA1", "RFFSTATUS", "RFFCFG", "RFRXFLEN", "RFRXFTHRS"
-group = "Custom", "RFRXFWR", "RFRXFRD", "RFRXFWP", "RFRXFRP", "RFRXFSWP", "RFRXFSRP"
-group = "Custom", "RFTXFLEN", "RFTXFTHRS", "RFTXFWR", "RFTXFRD", "RFTXFWP", "RFTXFRP"
-group = "Custom", "RFTXFSWP", "RFTXFSRP", "BSP_P0", "BSP_P1", "BSP_P2", "BSP_P3"
-group = "Custom", "BSP_D0", "BSP_D1", "BSP_D2", "BSP_D3", "BSP_W", "BSP_MODE"
-group = "Custom", "BSP_DATA", "DBGDATA", "IVCTRL", "CHVER", "CHVER.VERSION", "CHIPID"
-group = "Custom", "CHIPINFO0", "CHIPINFO1", "I2CCFG", "I2CSTAT", "I2CDATA", "I2CADDR"
-group = "Custom", "I2CWC", "I2CIO"
+group = "Custom", "T4CCTL1", "T4CC1", "TIMIF", "U0CSR", "U0UCR", "U0DBUF"
+group = "Custom", "U0BAUD", "U0BAUD.BAUD_M", "U1CSR", "U1UCR", "U1GCR", "U1DBUF"
+group = "Custom", "U1BAUD", "U1BAUD.BAUD_M", "WDCTL", "FCTL", "FADDRL", "FADDRH"
+group = "Custom", "FWDATA", "FRMCTRL0", "RFIRQM0", "RFIRQM1", "RFERRM", "FREQCTRL"
+group = "Custom", "FREQTUNE", "TXPOWER", "TXPOWER.PA_POWER", "TXCTRL", "LLESTAT", "SEMAPHORE0"
+group = "Custom", "SEMAPHORE1", "SEMAPHORE2", "RFSTAT", "RSSI", "RFPSRND", "RFPSRND.RNG_DOUT"
+group = "Custom", "MDMCTRL0", "MDMCTRL1", "MDMCTRL2", "MDMCTRL3", "SW_CONF", "SW0"
+group = "Custom", "SW1", "SW2", "SW3", "SW4", "SW5", "SW6"
+group = "Custom", "SW7", "DC_I_L", "DC_I_H", "DC_Q_L", "DC_Q_H", "FREQEST"
+group = "Custom", "RXCTRL", "FSCTRL", "LNAGAIN", "AAFGAIN", "ADCTEST0", "MDMTEST0"
+group = "Custom", "MDMTEST1", "DACTEST0", "ATEST", "RFC_OBS_CTRL0", "RFC_OBS_CTRL1", "RFC_OBS_CTRL2"
+group = "Custom", "LLECTRL", "TXFILTCFG", "RFRND", "RFRND.RND", "RFRAMCFG", "RFFDMA0"
+group = "Custom", "RFFDMA1", "RFFSTATUS", "RFFCFG", "RFRXFLEN", "RFRXFTHRS", "RFRXFWR"
+group = "Custom", "RFRXFRD", "RFRXFWP", "RFRXFRP", "RFRXFSWP", "RFRXFSRP", "RFTXFLEN"
+group = "Custom", "RFTXFTHRS", "RFTXFWR", "RFTXFRD", "RFTXFWP", "RFTXFRP", "RFTXFSWP"
+group = "Custom", "RFTXFSRP", "BSP_P0", "BSP_P1", "BSP_P2", "BSP_P3", "BSP_D0"
+group = "Custom", "BSP_D1", "BSP_D2", "BSP_D3", "BSP_W", "BSP_MODE", "BSP_DATA"
+group = "Custom", "DBGDATA", "IVCTRL", "CHVER", "CHVER.VERSION", "CHIPID", "CHIPINFO0"
+group = "Custom", "CHIPINFO1", "I2CCFG", "I2CSTAT", "I2CDATA", "I2CADDR", "I2CWC"
+group = "Custom", "I2CIO"
