@@ -1341,6 +1341,7 @@
           <state>HAL_AES_DMA=TRUE</state>
           <state>HAL_DMA=TRUE</state>
           <state>xPLUS_BROADCASTER</state>
+          <state>xPOWER_SAVING</state>
           <state>HAL_LCD=FALSE</state>
           <state>HAL_LED=FALSE</state>
           <state>HAL_UART=TRUE</state>

@@ -203,7 +203,7 @@ static uint8 scanRspData[] =
   0x55,   // 'U'
   0x54,   // 'T'
   0x45,   // 'E'
-  0x47,   // 'K'
+  0x4B,   // 'K'
   0x31,   // '1'
 
   // connection interval range
@@ -241,7 +241,7 @@ static uint8 advertData[] =
 };
 
 // GAP GATT Attributes
-static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "Simple BLE Periphera";
+static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "BLE-BOLUTEK2";
 
 /*********************************************************************
  * LOCAL FUNCTIONS
@@ -679,6 +679,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
  {
    uint8 numBytes = 0;
    uint16 nConnHandle;
+   uint16 nEvent; 
    unsigned short cmdlen=0;//命令长度
    unsigned char cmdflag=0;//命令标志
    numBytes = NPI_RxBufLen();           //读出串口缓冲区有多少字节
@@ -699,12 +700,11 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
 
         if(buffer[0] == 0x02 && buffer[numBytes-1] == 0x03)//判断帧头帧尾
         {  
-          //把收到的数据发送到串口-实现回环   
-          //NPI_WriteTransport(buffer, numBytes);
-          
           cmdflag = 1;
           cmdlen = buffer[1]*256+buffer[2];
-          CmdDeal(buffer,&cmdlen,&cmdflag);//串口命名处理函数
+          CmdDeal(buffer,&cmdlen,&cmdflag,&nEvent);//串口命名处理函数
+		  
+		  osal_start_timerEx(simpleBLEPeripheral_TaskID, nEvent, 0);
      
           /*
           uint8 nbDataPackage_Data[20];
@@ -731,16 +731,34 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
  
  if ( events & SBP_UPDATE_SCAN_RSP_DATA_EVT )        //更改设备名事件    
  {   
-    uint8 scanRspData_Update[] =    
+	extern uint8 MACname[maxnamelen];
+	uint8 initial_advertising_enable = FALSE;    
+    GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_enable );//关广播
+	NPI_WriteTransport(MACname,maxnamelen);
+	uint8 scanRspData_Update[] =    
     {    
-      0x07,     //自定义设备名的长度    
-      GAP_ADTYPE_LOCAL_NAME_COMPLETE,    
-      0x47,     //G    
-      0x55,     //U    
-      0x41,     //A    
-      0x3A,     //：    
-      0x00,     //空格    
-      0x00,     //空格    
+      	maxnamelen+1,     //自定义设备名的长度    
+      	GAP_ADTYPE_LOCAL_NAME_COMPLETE,    
+      	MACname[0],       
+      	MACname[1],         
+      	MACname[2],        
+      	MACname[3],         
+      	MACname[4],       
+      	MACname[5],    
+		MACname[6],     
+		MACname[7],    
+		MACname[8],
+		MACname[9],
+		MACname[10],
+		MACname[11],
+		MACname[12],
+		MACname[13],
+		MACname[14],
+		MACname[15],
+		MACname[16],
+		MACname[17],
+		MACname[18],
+		MACname[19],    
   
       // connection interval range  
       0x05,   // length of this data  
@@ -760,7 +778,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
                              sizeof(scanRspData_Update),    
                              scanRspData_Update );      //更新扫描应答数据
     
-    uint8 initial_advertising_enable = TRUE;    
+    initial_advertising_enable = TRUE;    
     GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_enable );//开广播    
      
     return (events ^ SBP_UPDATE_SCAN_RSP_DATA_EVT);
@@ -993,9 +1011,9 @@ static void performPeriodicTask( void )
     //SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
   }
   
-  if (gapProfileState == GAPROLE_CONNECTED)//判断蓝牙是否有连接，连接后关闭LED
+  if (gapProfileState == GAPROLE_CONNECTED)//判断蓝牙是否有连接，连接后开启LED
   {
-	LED3 = 0;
+	LED3 = 1;
   }
   else//未连接的时候LED闪烁
   {

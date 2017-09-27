@@ -14,9 +14,7 @@ unsigned short sendlen=0;	//待发送数据长度
 unsigned char HIDsendflag=0;	//1：还有数据待发送
 unsigned char HIDSendBuf[128];
 
-#define RTSN                            P1_0     
-#define STANDBY                         P1_1  
-#define MOD0                            P1_2
+uint8 MACname[maxnamelen];//设备名称
 
 void USBSend(void)//结果发送
 {
@@ -45,9 +43,10 @@ unsigned char Check(unsigned char *msg,unsigned short len)
 	return ret;
 }
 
-void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
+void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint16 *npEvent)
 {
 	unsigned char buf[256];
+	uint8 namelen;
 
 	if(*cmdflag == 0)
 		return ;
@@ -179,8 +178,20 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag)
 			#undef Ver
 			break;
 		
-		case 0x58:
-			//while(1);
+		case 0x58://更改设备名称
+			namelen = cmd[2]-7;
+			if(namelen >maxnamelen) 
+				break;
+			memset(MACname,0,maxnamelen);//初始化设备名
+			uint8 i;
+			for(i=0;i<namelen;i++) //
+			{
+				MACname[i] = cmd[5+i];
+			}
+			if(MACname[0] != 0)
+			{
+				*npEvent = SBP_UPDATE_SCAN_RSP_DATA_EVT;
+			}
 		break;
 		
 		default:
