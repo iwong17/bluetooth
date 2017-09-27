@@ -63,7 +63,7 @@ extern "C"
 #define SBP_RF_COMMUNICAION_COMMAND_ERR_EVT           0x0010  //通信数据出错事件  
 #define SBP_LED_ON_OFF_EVT                            0x0020  //led开关事件
 #define NpiSerial_EVT                                 0x0040  //串口事件
-#define SBP_UPDATE_SCAN_RSP_DATA_EVT                  0x0080  //更改设备名事件
+#define SBP_UPDATE_SCAN_RSP_DATA_EVT                  0x0080  //更改广播设备名事件
 
 /*********************************************************************
  * MACROS

@@ -15,6 +15,7 @@ unsigned char HIDsendflag=0;	//1：还有数据待发送
 unsigned char HIDSendBuf[128];
 
 uint8 MACname[maxnamelen];//设备名称
+extern uint8 TimeOut;//超时时间(s)
 
 void USBSend(void)//结果发送
 {
@@ -192,6 +193,9 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 			{
 				*npEvent = SBP_UPDATE_SCAN_RSP_DATA_EVT;
 			}
+			
+	    case 0x59:
+			TimeOut = cmd[5];
 		break;
 		
 		default:

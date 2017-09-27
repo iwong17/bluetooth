@@ -249,7 +249,7 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
     // Characteristic 2 Declaration
     { 
       { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ, 
+      GATT_PERMIT_AUTHEN_READ, 
       0,
       &simpleProfileChar2Props 
     },

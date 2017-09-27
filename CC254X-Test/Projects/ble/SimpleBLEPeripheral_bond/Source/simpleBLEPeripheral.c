@@ -142,8 +142,10 @@
 
 #if defined ( PLUS_BROADCASTER )
   #define ADV_IN_CONN_WAIT                    500 // delay 500 ms
-#endif
+#endif					  
 
+uint8 UARTFlag = 0;
+uint8 TimeOut = 30;
 /*********************************************************************
  * TYPEDEFS
  */
@@ -690,7 +692,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    }
    else
    {
-     
+      UARTFlag = 1;
       //申请缓冲区buffer  
       uint8 *buffer = osal_mem_alloc(numBytes);  
       if(buffer)//缓冲区申请成功  
@@ -729,36 +731,19 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    return (events ^ NpiSerial_EVT);
  }
  
- if ( events & SBP_UPDATE_SCAN_RSP_DATA_EVT )        //更改设备名事件    
+ if ( events & SBP_UPDATE_SCAN_RSP_DATA_EVT )        //更改广播设备名事件    
  {   
-	extern uint8 MACname[maxnamelen];
+	extern uint8 MACname[maxnamelen];//名称长度最大为20
 	uint8 initial_advertising_enable = FALSE;    
     GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &initial_advertising_enable );//关广播
-	NPI_WriteTransport(MACname,maxnamelen);
 	uint8 scanRspData_Update[] =    
     {    
       	maxnamelen+1,     //自定义设备名的长度    
       	GAP_ADTYPE_LOCAL_NAME_COMPLETE,    
-      	MACname[0],       
-      	MACname[1],         
-      	MACname[2],        
-      	MACname[3],         
-      	MACname[4],       
-      	MACname[5],    
-		MACname[6],     
-		MACname[7],    
-		MACname[8],
-		MACname[9],
-		MACname[10],
-		MACname[11],
-		MACname[12],
-		MACname[13],
-		MACname[14],
-		MACname[15],
-		MACname[16],
-		MACname[17],
-		MACname[18],
-		MACname[19],    
+      	MACname[0], MACname[1], MACname[2], MACname[3], MACname[4], MACname[5],    
+		MACname[6], MACname[7], MACname[8], MACname[9], MACname[10],MACname[11],
+		MACname[12],MACname[13],MACname[14],MACname[15],MACname[16],MACname[17],
+		MACname[18],MACname[19],    
   
       // connection interval range  
       0x05,   // length of this data  
@@ -770,7 +755,7 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
   
       // Tx power level  
       0x02,   // length of this data  
-      GAP_ADTYPE_POWER_LEVEL,  
+      GAP_ADTYPE_POWER_LEVEL, //发射功率，可调范围为：-127~127dbm  
       0       // 0dBm    
     };       
     GAP_UpdateAdvertisingData(simpleBLEPeripheral_TaskID,     
@@ -997,7 +982,11 @@ static void performPeriodicTask( void )
 {
   uint8 valueToCopy;
   uint8 stat;
-  
+  uint8 str[5];
+  static uint8 i = 30;
+  str[0] = i;
+  str[1] = '\0';
+  NPI_WriteTransport(str,1);
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
 
   if( stat == SUCCESS )
@@ -1011,7 +1000,7 @@ static void performPeriodicTask( void )
     //SimpleProfile_SetParameter( SIMPLEPROFILE_CHAR4, sizeof(uint8), &valueToCopy);
   }
   
-  if (gapProfileState == GAPROLE_CONNECTED)//判断蓝牙是否有连接，连接后开启LED
+  if (gapProfileState == GAPROLE_CONNECTED)//判断蓝牙是否有连接，连接时开启LED
   {
 	LED3 = 1;
   }
@@ -1019,6 +1008,21 @@ static void performPeriodicTask( void )
   {
 	LED3 = ~LED3;
   }
+  if(UARTFlag == 1)//串口又有数据重新计时
+  {
+	  i = 30;
+	  UARTFlag = 0;
+  }
+  else
+  {  
+  	  if(i-- == 0)
+	  {
+		  i = 30;
+		  THM_Close_RF();
+		  NPI_WriteTransport("c",1);
+	  }
+  }
+  
 }
 
 /*********************************************************************
@@ -1134,31 +1138,25 @@ static void ProcessPasscodeCB(uint8 *deviceAddr,uint16 connectionHandle,uint8 ui
 //绑定过程中的状态管理，在这里可以设置标志位，当密码不正确时不允许连接。
 static void ProcessPairStateCB( uint16 connHandle, uint8 state, uint8 status )
 {
-  if ( state == GAPBOND_PAIRING_STATE_STARTED )/*主机发起连接，会进入开始绑定状态*/
+  if ( state == GAPBOND_PAIRING_STATE_STARTED )//主机发起连接，会进入开始绑定状态Pairing started
   {
-        HalLcdWriteString( "Pairing started", HAL_LCD_LINE_1 );
-	gPairStatus = 0;
+    gPairStatus = 0;
   }
   else if ( state == GAPBOND_PAIRING_STATE_COMPLETE )/*当主机提交密码后，会进入完成*/
   {
-    if ( status == SUCCESS )
+    if ( status == SUCCESS )/*密码正确*/
     {
-          HalLcdWriteString( "Pairing success", HAL_LCD_LINE_1 );/*密码正确*/
 	  gPairStatus = 1;
     }
-    else
+    else if(status == SMP_PAIRING_FAILED_UNSPECIFIED)//Paired device
+    {   
+      gPairStatus = 1; 
+	}
+    else//Pairing fail
     {
-          HalLcdWriteStringValue( "Pairing fail", status, 10, HAL_LCD_LINE_1 );/*密码不正确，或者先前已经绑定*/
-	  if(status ==8)
-          {/*已绑定*/
-		gPairStatus = 1;
-	  }
-          else
-          {
-		gPairStatus = 0;
-	  }
-     }
-     //判断配对结果，如果不正确立刻停止连接。
+	  gPairStatus = 0;
+	}
+	//判断配对结果，如果不正确立刻停止连接。
     if(simpleBLEState == BLE_STATE_CONNECTED && gPairStatus !=1)
     {
       GAPRole_TerminateConnection();  // 终止连接
@@ -1172,7 +1170,6 @@ static void ProcessPairStateCB( uint16 connHandle, uint8 state, uint8 status )
       HalLcdWriteString( "Bonding success", HAL_LCD_LINE_1 );
     }
   }
-
 }
 
 //******************************************************************************          

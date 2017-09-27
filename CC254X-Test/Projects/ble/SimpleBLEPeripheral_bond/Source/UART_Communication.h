@@ -4,7 +4,7 @@
 #include <string.h>
 #include "hal_types.h"
 
-#define SBP_UPDATE_SCAN_RSP_DATA_EVT                  0x0080  //更改设备名事件
+#define SBP_UPDATE_SCAN_RSP_DATA_EVT                  0x0080  //更改广播设备名事件
 #define maxnamelen 20
 #define RTSN                            P1_0     
 #define STANDBY                         P1_1  
