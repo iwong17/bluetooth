@@ -144,8 +144,9 @@
   #define ADV_IN_CONN_WAIT                    500 // delay 500 ms
 #endif					  
 
-uint8 UARTFlag = 0;
-uint8 TimeOut = 30;
+uint8 TimeOutFlag = 0;
+uint8 newTimeOutFlag = 0;
+extern uint8 TimeOut;
 /*********************************************************************
  * TYPEDEFS
  */
@@ -692,7 +693,8 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    }
    else
    {
-      UARTFlag = 1;
+      TimeOutFlag = 1;
+	  newTimeOutFlag = 1;
       //申请缓冲区buffer  
       uint8 *buffer = osal_mem_alloc(numBytes);  
       if(buffer)//缓冲区申请成功  
@@ -982,13 +984,9 @@ static void performPeriodicTask( void )
 {
   uint8 valueToCopy;
   uint8 stat;
-  uint8 str[5];
-  static uint8 i = 30;
-  str[0] = i;
-  str[1] = '\0';
-  NPI_WriteTransport(str,1);
+  static uint8 i = 0;
+  
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
-
   if( stat == SUCCESS )
   {
     /*
@@ -1008,18 +1006,23 @@ static void performPeriodicTask( void )
   {
 	LED3 = ~LED3;
   }
-  if(UARTFlag == 1)//串口又有数据重新计时
+  if(newTimeOutFlag == 1)//串口有数据重新计时
   {
-	  i = 30;
-	  UARTFlag = 0;
+	  i = 0;
+	  newTimeOutFlag = 0;
+	  THM_Open_RF();//开射频
   }
-  else
-  {  
-  	  if(i-- == 0)
+  if(TimeOutFlag == 1)//串口有数据开始计时
+  {
+	  if(i<TimeOut)
 	  {
-		  i = 30;
-		  THM_Close_RF();
-		  NPI_WriteTransport("c",1);
+	  	i++;
+  	  }
+      else
+      {  
+		 i = 0;
+		 TimeOutFlag = 0;//到达计时时间关闭标志
+		 THM_Close_RF(); //到达计时时间关闭射频
 	  }
   }
   
