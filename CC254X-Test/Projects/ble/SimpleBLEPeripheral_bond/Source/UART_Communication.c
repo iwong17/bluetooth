@@ -15,7 +15,8 @@ unsigned char HIDsendflag=0;	//1：还有数据待发送
 unsigned char HIDSendBuf[128];
 
 uint8 MACname[maxnamelen];//设备名称
-uint8 TimeOut = 30;//超时时间(s)
+uint8 UARTTimeOut = 30;//串口命令超时时间(s)
+uint8 SearchTimeOut = 10;//寻卡命令超时时间(s)
 
 void USBSend(void)//结果发送
 {
@@ -194,8 +195,12 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 				*npEvent = SBP_UPDATE_SCAN_RSP_DATA_EVT;
 			}
 			
-	    case 0x59://更改超时时间，长度为两字节，单位为s
-			TimeOut = cmd[5]*256+cmd[6];
+	    case 0x59://串口命令超时：更改超时时间，长度为两字节，单位为s
+			UARTTimeOut = cmd[5]*256+cmd[6];
+		break;
+		
+		case 0x5A://寻卡命令超时：更改超时时间，长度为两字节，单位为s
+			SearchTimeOut = cmd[5]*256+cmd[6];
 		break;
 		
 		default:

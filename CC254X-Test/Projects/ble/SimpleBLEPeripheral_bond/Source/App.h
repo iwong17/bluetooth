@@ -16,8 +16,6 @@ extern void buzzerInit(void);
 extern uint8 buzzerStart(uint16 frequency);
 extern void buzzerStop(void);
 
-extern void Timer1_Init(void);
-
 extern void Read_Mac(uint8 *ownAddress);
 extern void Write_Mac(uint8 *DeviceMAC);
 

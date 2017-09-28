@@ -58,7 +58,6 @@ void buzzerInit(void)
     // Channel 0 will toggle on compare with 0 and counter will
     // count in up/down mode to T3CC0.
 
-    PERCFG |= 0x20;             // Timer 3 Alternate location 2
     P0DIR |= 0x04;              // P0_2 = output
     P0SEL |= 0x04;              // Peripheral function on P0_2
 
@@ -128,30 +127,6 @@ void buzzerStop(void)
 {
     T3CTL &= ~0x10;             // Stop timer 3
     P1SEL &= ~0x40;
-    P1_6 = 0;
-}  
-
-//******************************************************************************          
-//name:             Timer1_Init          
-//introduce:        定时器1的初始化        
-//parameter:        none         
-//return:           none
-//changetime:       2017.08.23
-//author:           
-//******************************************************************************     
-void Timer1_Init(void)      
-{  
-  //定时器1配置  
-  T1CTL = (3<<2)|(2<<0);            //0000(reserved)、11(128分频，32M/128=250K、10（Modulo）  
-  T1CNTL = 0;                       //清除计数器  
-    
-  //定时器1的通道0配置  
-  T1CCTL0 = (1<<6)|(7<<3)|(1<<2)|(0<<0);//Enables interrupt request、Initialize output pin. CMP[2:0] is not changed、Compare mode、 No capture  
-  T1CC0H = 2500/256;                    //高位  100Hz
-  T1CC0L = 2500%256;                    //低位   
-   
-  //中断配置  
-  IEN1 |= (1<<1);                       //定时器1中断使能  
 }
 
 //**************************************************  

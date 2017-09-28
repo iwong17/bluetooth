@@ -144,9 +144,9 @@
   #define ADV_IN_CONN_WAIT                    500 // delay 500 ms
 #endif					  
 
-uint8 TimeOutFlag = 0;
-uint8 newTimeOutFlag = 0;
-extern uint8 TimeOut;
+uint8 UARTTimeOutFlag = 1; //开机即判断超时　所以设为１
+uint8 newUARTTimeOutFlag = 0;
+extern uint8 UARTTimeOut;
 /*********************************************************************
  * TYPEDEFS
  */
@@ -693,8 +693,9 @@ uint16 SimpleBLEPeripheral_ProcessEvent( uint8 task_id, uint16 events )
    }
    else
    {
-      TimeOutFlag = 1;
-	  newTimeOutFlag = 1;
+      UARTTimeOutFlag = 1;
+	  newUARTTimeOutFlag = 1;
+	  THM_Open_RF();//开射频
       //申请缓冲区buffer  
       uint8 *buffer = osal_mem_alloc(numBytes);  
       if(buffer)//缓冲区申请成功  
@@ -985,7 +986,7 @@ static void performPeriodicTask( void )
   uint8 valueToCopy;
   uint8 stat;
   static uint8 i = 0;
-  
+  uint8 times = UARTTimeOut*1000/SBP_PERIODIC_EVT_PERIOD;//根据周期时间计算循环次数
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
   if( stat == SUCCESS )
   {
@@ -1006,23 +1007,24 @@ static void performPeriodicTask( void )
   {
 	LED3 = ~LED3;
   }
-  if(newTimeOutFlag == 1)//串口有数据重新计时
+  if(newUARTTimeOutFlag == 1)//串口有新数据重新计时
   {
 	  i = 0;
-	  newTimeOutFlag = 0;
-	  THM_Open_RF();//开射频
+	  newUARTTimeOutFlag = 0;
+	  //已在串口回调函数中开射频，快速
+	  //THM_Open_RF();//开射频
   }
-  if(TimeOutFlag == 1)//串口有数据开始计时
+  if(UARTTimeOutFlag == 1)//串口有数据开始计时
   {
-	  if(i<TimeOut)
+	  if(i<times)
 	  {
 	  	i++;
   	  }
       else
       {  
 		 i = 0;
-		 TimeOutFlag = 0;//到达计时时间关闭标志
-		 THM_Close_RF(); //到达计时时间关闭射频
+		 UARTTimeOutFlag = 0;//到达计时时间关闭标志
+		 THM_Close_RF();     //到达计时时间关闭射频
 	  }
   }
   
