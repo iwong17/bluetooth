@@ -111,6 +111,9 @@ extern "C"
 	EXTERN void THM_ClrBuf(void);
 	EXTERN void THM_PowerDown(void);
 	
+	EXTERN void THM_CloseCarrier(void);
+	EXTERN void THM_OpenCarrier(void);
+	
 	#undef EXTERN
 	
 #ifdef __cplusplus

@@ -10,13 +10,16 @@
 #include "npi.h"
 #include "THM3070.h"
 
-unsigned short sendlen=0;	//待发送数据长度
+#define Delaytime 1000
+
+unsigned short sendlen=0;	    //待发送数据长度
 unsigned char HIDsendflag=0;	//1：还有数据待发送
 unsigned char HIDSendBuf[128];
 
 uint8 MACname[maxnamelen];//设备名称
 uint8 UARTTimeOut = 30;//串口命令超时时间(s)
 uint8 SearchTimeOut = 10;//寻卡命令超时时间(s)
+uint8 SearchCount;
 
 void USBSend(void)//结果发送
 {
@@ -49,11 +52,11 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 {
 	unsigned char buf[256];
 	uint8 namelen;
-
+	static uint8 times = 0;
 	if(*cmdflag == 0)
 		return ;
 	*cmdflag=0;
-
+	SearchCount = SearchTimeOut*1000/Delaytime;
 	if(Check(cmd,cmd[2]-1) != 0 || cmd[cmd[2]-1] != 3)return;
 	
 	switch(cmd[4])//Parameter
@@ -63,11 +66,30 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 			signed char ret;
 			if(THM_Write(cmd+5,cmd[2]-7) == 0)//写命令成功后才能进行读操作
 			{
-				ret = THM_Read(HIDSendBuf+5,&sendlen);
-				if(ret > 0)ret = 0;
+				do
+				{
+					if(THM_Write(cmd+5,cmd[2]-7) == 0)//写命令成功后才能进行读操作
+					{
+						ret = THM_Read(HIDSendBuf+5,&sendlen);
+						if(ret > 0)
+						{
+							ret = 0;
+						}
+						
+					}
+					Delay_ms(Delaytime);
+					times++;
+					unsigned char str[2];
+					str[0] = times;
+					str[1] = '\0';
+					NPI_WriteTransport(str,1);
+				}while(ret<0 && times<SearchCount);
 			}
 			else
+			{
 				ret = -7;//写命令超时
+			}   
+			times = 0;
 			
 			HIDSendBuf[0] = 0x02;
 			HIDSendBuf[1] = (sendlen + 8) >> 8;
