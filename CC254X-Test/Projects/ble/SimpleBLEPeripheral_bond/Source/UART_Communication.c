@@ -57,6 +57,7 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 		return ;
 	*cmdflag=0;
 	SearchCount = SearchTimeOut*1000/Delaytime;
+	
 	if(Check(cmd,cmd[2]-1) != 0 || cmd[cmd[2]-1] != 3)return;
 	
 	switch(cmd[4])//Parameter
@@ -64,31 +65,24 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 		case 00:
 		{
 			signed char ret;
-			if(THM_Write(cmd+5,cmd[2]-7) == 0)//写命令成功后才能进行读操作
+			do
 			{
-				do
+				if(THM_Write(cmd+5,cmd[2]-7) == 0)//写命令成功后才能进行读操作
 				{
-					if(THM_Write(cmd+5,cmd[2]-7) == 0)//写命令成功后才能进行读操作
+					ret = THM_Read(HIDSendBuf+5,&sendlen);
+					if(ret > 0)
 					{
-						ret = THM_Read(HIDSendBuf+5,&sendlen);
-						if(ret > 0)
-						{
-							ret = 0;
-						}
-						
+						ret = 0;
 					}
-					Delay_ms(Delaytime);
-					times++;
-					unsigned char str[2];
-					str[0] = times;
-					str[1] = '\0';
-					NPI_WriteTransport(str,1);
-				}while(ret<0 && times<SearchCount);
-			}
-			else
-			{
-				ret = -7;//写命令超时
-			}   
+						
+				}
+				else
+				{
+					ret = -7;//写命令超时
+				} 
+				Delay_ms(Delaytime);
+				times++;
+			}while(ret<0 && times<SearchCount);  
 			times = 0;
 			
 			HIDSendBuf[0] = 0x02;
