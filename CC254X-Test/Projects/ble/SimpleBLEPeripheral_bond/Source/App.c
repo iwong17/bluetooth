@@ -141,7 +141,7 @@ void Read_Mac(uint8 *ownAddress)     //读本机MAC 在初始化时不能通过
   ownAddress[3] = *(unsigned char *)(0x7810);    
   ownAddress[2] = XREG(0x7811);                // define 函数直接读出数据     
   ownAddress[1] = XREG(0x7812);    
-  ownAddress[0] = XREG(0x7813);   
+  ownAddress[0] = XREG(0x7813);
 }
 //**************************************************  
 //name:         Write_Mac  
@@ -150,7 +150,6 @@ void Read_Mac(uint8 *ownAddress)     //读本机MAC 在初始化时不能通过
 //**************************************************  
 void Write_Mac(uint8 *bdAddr)    //primary MAC只读，secondary可读可写                                    
 {  
-  uint8 status;
-  status = HCI_EXT_SetBDADDRCmd(bdAddr);
+  HCI_EXT_SetBDADDRCmd(bdAddr);
 }
 

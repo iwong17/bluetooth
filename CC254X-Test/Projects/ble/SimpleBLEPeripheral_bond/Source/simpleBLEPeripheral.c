@@ -988,6 +988,7 @@ static void performPeriodicTask( void )
   static uint8 i = 0;
   uint8 times = UARTTimeOut*1000/SBP_PERIODIC_EVT_PERIOD;//根据周期时间计算循环次数
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
+  uint8 MACAddr[6];
   if( stat == SUCCESS )
   {
     /*

@@ -5,10 +5,6 @@
 #include "hal_mcu.h"
 #include "npi.h"
 
-#define RTSN                            P1_0     
-#define STANDBY                         P1_1  
-#define MOD0                            P1_2
-
 //´ò¿ªÉäÆµ
 void THM_Open_RF(void)
 {

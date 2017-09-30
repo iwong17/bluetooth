@@ -9,6 +9,7 @@
 #include "hal_types.h"
 #include "npi.h"
 #include "THM3070.h"
+#include "App.h"
 
 #define Delaytime 1000
 
@@ -17,17 +18,23 @@ unsigned char HIDsendflag=0;	//1：还有数据待发送
 unsigned char HIDSendBuf[128];
 
 uint8 MACname[maxnamelen];//设备名称
+uint8 MACAddr[6];//MAC地址为6字节
 uint8 UARTTimeOut = 30;//串口命令超时时间(s)
 uint8 SearchTimeOut = 10;//寻卡命令超时时间(s)
 uint8 SearchCount;
 
 void USBSend(void)//结果发送
 {
-	if(sendlen > 64)//发送第一个数据包，还有后续
+	static uint8 i = 0;
+	if(sendlen > 64)//多个数据包则陆续分包发送
 	{
-		NPI_WriteTransport(HIDSendBuf,64);
-		sendlen-=64;
-		HIDsendflag=1;
+		do
+		{
+			NPI_WriteTransport(HIDSendBuf+i*64,64);
+			sendlen-=64;
+			i++;
+		}while(sendlen>0);
+		i = 0;
 	}
 	else//只有一个数据包
 	{
@@ -110,7 +117,7 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 			break;
 		case 2://关闭载波
 			THM_Close_RF();
-			P1 &= ~0x08;
+			P1 &= ~0x08;   //关闭LED灯
 			HIDSendBuf[0] = 'O';
 			HIDSendBuf[1] = 'K';
 			sendlen = 2;
@@ -217,6 +224,35 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 		
 		case 0x5A://寻卡命令超时：更改超时时间，长度为两字节，单位为s
 			SearchTimeOut = cmd[5]*256+cmd[6];
+		break;
+		
+		case 0x5B://读MAC地址
+			Read_Mac(MACAddr);//MAC地址6字节 
+			sendlen = 6;
+			HIDSendBuf[0] = 0x02;
+			HIDSendBuf[1] = (sendlen + 7) >> 8;
+			HIDSendBuf[2] = sendlen + 7;
+			HIDSendBuf[3] = 0x01;
+			HIDSendBuf[4] = 0x5B;
+			memcpy(HIDSendBuf+5,MACAddr,6);
+			HIDSendBuf[5+sendlen] = Check(HIDSendBuf,5+sendlen);
+			HIDSendBuf[6+sendlen] = 0x03;
+			sendlen += 7;
+			USBSend();
+		break;
+		
+		case 0x5C://写MAC地址
+			MACAddr[0] = cmd[5];
+			MACAddr[1] = cmd[6];
+			MACAddr[2] = cmd[7];
+			MACAddr[3] = cmd[8];
+			MACAddr[4] = cmd[9];
+			MACAddr[5] = cmd[10];
+			Write_Mac(MACAddr);
+			HIDSendBuf[0] = 'O';
+			HIDSendBuf[1] = 'K';
+			sendlen = 2;
+			USBSend();
 		break;
 		
 		default:

@@ -102,6 +102,10 @@ extern "C"
 	#define RCV_BAUD_212K   0x01
 	#define RCV_BAUD_424K   0x02
 	#define RCV_BAUD_848K   0x03
+	
+	#define RTSN                            P1_0     
+	#define STANDBY                         P1_1  
+	#define MOD0                            P1_2
 
 	EXTERN void THM_Open_RF(void);
 	EXTERN void THM_Close_RF(void);
