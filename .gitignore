@@ -63,6 +63,8 @@ Backup of*
 *.dni
 *.wsdt
 *.dbgdt
+*.sfr
+*.tmp
 
 #过滤压缩包
 *.rar
