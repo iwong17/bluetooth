@@ -63,6 +63,7 @@
 #include "RF_Communication.h" //增加通讯协议
 #include "UART_Communication.h" //增加通讯协议
 #include "THM3070.H"
+#include "osal_snv.h"//Flash读写头文件
 
 #include "gapgattserver.h"
 #include "gattservapp.h"
@@ -146,7 +147,9 @@
 
 uint8 UARTTimeOutFlag = 1; //开机即判断超时　所以设为１
 uint8 newUARTTimeOutFlag = 0;
-extern uint8 UARTTimeOut;
+extern uint16 UARTTimeOut;
+extern uint16 SearchTimeOut;
+uint8 TimeOut_data[4];
 /*********************************************************************
  * TYPEDEFS
  */
@@ -333,9 +336,15 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   THM_Init();//THM初始化
   
   THM_Open_RF();//打开射频
+  
+  SNV_TimeOutWriteRead(SNV_TimeOut_READ, TimeOut_data, sizeof(TimeOut_data));//初始化超时时间，30s，10s
+  UARTTimeOut = TimeOut_data[0]*256 + TimeOut_data[1];
+  NPI_WriteTransport(&TimeOut_data[1],1);
+  SearchTimeOut = TimeOut_data[2]*256 + TimeOut_data[3];
+  Delay_ms(100);
    
   // Setup the GAP
-//  VOID GAP_SetParamValue( TGAP_CONN_PAUSE_PERIPHERAL, DEFAULT_CONN_PAUSE_PERIPHERAL );
+  //VOID GAP_SetParamValue( TGAP_CONN_PAUSE_PERIPHERAL, DEFAULT_CONN_PAUSE_PERIPHERAL );
   
   // Setup the GAP Peripheral Role Profile
   {
@@ -988,7 +997,6 @@ static void performPeriodicTask( void )
   static uint8 i = 0;
   uint8 times = UARTTimeOut*1000/SBP_PERIODIC_EVT_PERIOD;//根据周期时间计算循环次数
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
-  uint8 MACAddr[6];
   if( stat == SUCCESS )
   {
     /*
@@ -1020,6 +1028,7 @@ static void performPeriodicTask( void )
 	  if(i<times)
 	  {
 	  	i++;
+		NPI_WriteTransport(&i,1);
   	  }
       else
       {  

@@ -10,6 +10,9 @@
 #include "npi.h"
 #include "THM3070.h"
 #include "App.h"
+#include "osal_snv.h"//Flash读写头文件
+#include "UART_Communication.h"
+#include "comdef.h"
 
 #define Delaytime 1000
 
@@ -19,10 +22,10 @@ unsigned char HIDSendBuf[128];
 
 uint8 MACname[maxnamelen];//设备名称
 uint8 MACAddr[6];//MAC地址为6字节
-uint8 UARTTimeOut = 30;//串口命令超时时间(s)
-uint8 SearchTimeOut = 10;//寻卡命令超时时间(s)
+uint16 UARTTimeOut;//串口命令超时时间(s)
+uint16 SearchTimeOut;//寻卡命令超时时间(s)
 uint8 SearchCount;
-
+extern uint8 TimeOut_data[4];
 void USBSend(void)//结果发送
 {
 	static uint8 i = 0;
@@ -89,6 +92,7 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 				} 
 				Delay_ms(Delaytime);
 				times++;
+				NPI_WriteTransport(&times,1);
 			}while(ret<0 && times<SearchCount);  
 			times = 0;
 			
@@ -220,10 +224,20 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 			
 	    case 0x59://串口命令超时：更改超时时间，长度为两字节，单位为s
 			UARTTimeOut = cmd[5]*256+cmd[6];
+			TimeOut_data[0] = cmd[5];
+			TimeOut_data[1] = cmd[6];
+			TimeOut_data[2] = SearchTimeOut/256;
+			TimeOut_data[3] = SearchTimeOut%256;
+			SNV_TimeOutWriteRead(SNV_TimeOut_WRITE, TimeOut_data, sizeof(TimeOut_data));
 		break;
 		
 		case 0x5A://寻卡命令超时：更改超时时间，长度为两字节，单位为s
 			SearchTimeOut = cmd[5]*256+cmd[6];
+			TimeOut_data[0] = UARTTimeOut/256;
+			TimeOut_data[1] = UARTTimeOut%256;
+			TimeOut_data[2] = cmd[5];
+			TimeOut_data[3] = cmd[6];
+			SNV_TimeOutWriteRead(SNV_TimeOut_WRITE, TimeOut_data, sizeof(TimeOut_data));
 		break;
 		
 		case 0x5B://读MAC地址
@@ -259,3 +273,50 @@ void CmdDeal(unsigned char *cmd,unsigned short *len,unsigned char *cmdflag, uint
 		break;
 	}
 }
+
+//******************************************************************************                    
+//name:             SNV_TimeOutWriteRead                   
+//introduce:        从SNV读取或更新连接密码                 
+//parameter:        WriteReadFlag:SNV_TimeOut_READ or SNV_TimeOut_WRITE       
+//                  np TimeOut:密码首地址  
+//                   Len:密码长度  
+//return:           none                
+//author:                                                                          
+//changetime:       2017.10.09                          
+//******************************************************************************  
+void SNV_TimeOutWriteRead(uint8 WriteReadFlag, uint8 *TimeOut, uint8 Len)  
+{  
+  uint8 Ret;  
+  uint8 Default_TimeOut[4];  
+    
+  //从SNV读密码  
+  if(WriteReadFlag ==  SNV_TimeOut_READ)  
+  {  
+     Ret = osal_snv_read(SNV_TimeOut_ID, Len, TimeOut);  
+  
+    //如果第一次读取失败，则说明没有写过超时时间，是出厂的设备。因此在这里设置为出厂超时时间。  
+    if(Ret == NV_OPER_FAILED)  
+    {  
+      //未保存过，设置超时时间
+      Default_TimeOut[0] = 0;
+	  Default_TimeOut[1] = 30;
+	  Default_TimeOut[2] = 0;
+	  Default_TimeOut[3] = 10;  
+        
+      //将超时时间写入snv中  
+      osal_snv_write(SNV_TimeOut_ID, sizeof( Default_TimeOut), Default_TimeOut);
+          
+      //读出超时时间  
+      Ret = osal_snv_read(SNV_TimeOut_ID, Len, TimeOut);
+    }   
+  }  
+  //写新的超时时间到SNV    
+  else if( WriteReadFlag == SNV_TimeOut_WRITE)
+  {  
+    //写进新的超时时间 
+    osal_snv_write(SNV_TimeOut_ID, Len, TimeOut);
+      
+    //读出超时时间 
+    Ret = osal_snv_read(SNV_TimeOut_ID, Len, TimeOut);      
+  }   
+} 
