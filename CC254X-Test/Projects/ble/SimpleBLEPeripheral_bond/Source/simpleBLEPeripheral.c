@@ -344,7 +344,7 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   Delay_ms(100);
    
   // Setup the GAP
-  //VOID GAP_SetParamValue( TGAP_CONN_PAUSE_PERIPHERAL, DEFAULT_CONN_PAUSE_PERIPHERAL );
+  // VOID GAP_SetParamValue( TGAP_CONN_PAUSE_PERIPHERAL, DEFAULT_CONN_PAUSE_PERIPHERAL );
   
   // Setup the GAP Peripheral Role Profile
   {
